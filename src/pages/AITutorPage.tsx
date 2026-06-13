@@ -22,17 +22,6 @@ const mockConversations: Conversation[] = [
   { id: '4', title: 'மாதிரி கேள்வி தொகுப்பு', date: 'Last week', mode: 'MCQ_GEN', isActive: false },
 ];
 
-const responseMap: Record<string, string> = {
-  history: 'தமிழ்நாட்டின் வரலாறு பண்டைய சோழ பேரரசு, பாண்டிய பேரரசு மற்றும் சேர பேரரசுடன் தொடங்கி, ஆங்கிலேய காலம் வரை பல்வேறு சாம்ராஜ்ய ஆட்சியை கண்டிருக்கிறது. தெರியல் மண்ணிலே பல உயர்ந்த கட்டிடக்கலை மாமிச மற்றும் கலை கொஞ்சம் உருவாகிவிட்டன.',
-  வரலாறு: 'தமிழ்நாட்டின் வரலாறு பண்டைய சோழ பேரரசு, பாண்டிய பேரரசு மற்றும் சேர பேரரசுடன் தொடங்கி, ஆங்கிலேய காலம் வரை பல்வேறு சாம்ராஜ்ய ஆட்சியை கண்டிருக்கிறது.',
-  constitution: 'இந்திய அரசியலமைப்பு 1950 ஜனவரி 26-ம் தேதியன்று நடுத்தமிழிலாக அமுல்படுத்தப்பட்டது. இது ஜனநாயக வடிவத்தை குறிப்பிடுகிறது மற்றும் அனைத்து குடிமக்களுக்கும் சமைப்புக்குரிய உரிமைகளை வழங்குகிறது.',
-  அரசியலமைப்பு: 'இந்திய அரசியலமைப்பு 1950 ஜனவரி 26-ம் தேதியன்று நடுத்தமிழிலாக அமுல்படுத்தப்பட்டது. இது ஜனநாயக வடிவத்திற்கு உரிய நீதித் தொகுப்பைக் கொண்டுள்ளது.',
-  geography: 'தமிழ்நாட்டின் புவியியல் சிறப்பு கொண்ட நிலப்பரப்பு, அதாவது மலைகள், சமவெளிகள் மற்றும் கடற்கரைகளால் சூழப்பட்டுள்ளது. இது 130,000 சதுர கி.மீ பரப்பளவாக விரிந்துள்ளது.',
-  புவியியல்: 'தமிழ்நாட்டின் புவியியல் சிறப்பு கொண்ட நிலப்பரப்பு, அதாவது மலைகள், சமவெளிகள் மற்றும் கடற்கரைகளால் சூழப்பட்டுள்ளது.',
-};
-
-const defaultResponse = 'TNPSC தேர்வுகளுக்கு தயாரிப்புக்கு விடாமுயற்சி மற்றும் முறையான கற்றலை பின்பற்றவும். நீங்கள் மேலும் எந்த பாடப்பொருள் பற்றி கற்க விரும்புகிறீர்கள்?';
-
 function TypingIndicator() {
   return (
     <motion.div className="flex items-end gap-1 py-3">
@@ -50,7 +39,6 @@ function TypingIndicator() {
 
 function ConversationHistory({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const t = useT();
-
   return (
     <motion.div
       initial={{ x: -300, opacity: 0 }}
@@ -63,12 +51,10 @@ function ConversationHistory({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           <X className="w-5 h-5 text-gray-400" />
         </button>
       </div>
-
       <button className="m-4 flex items-center justify-center gap-2 btn-primary w-full">
         <Plus className="w-4 h-4" />
         <span className="text-sm">{t('புதிய சாட்', 'New Chat')}</span>
       </button>
-
       <div className="flex-1 overflow-y-auto space-y-2 px-4">
         {mockConversations.map((conv) => (
           <motion.button
@@ -96,7 +82,6 @@ function ConversationHistory({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
 function ChatMessage({ msg, idx }: { msg: AIMessage; idx: number }) {
   const isUser = msg.role === 'user';
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -109,7 +94,6 @@ function ChatMessage({ msg, idx }: { msg: AIMessage; idx: number }) {
           <Zap className="w-4 h-4 text-navy-950" />
         </div>
       )}
-
       <div
         className={`max-w-xs md:max-w-md px-4 py-3 rounded-lg ${
           isUser
@@ -117,7 +101,7 @@ function ChatMessage({ msg, idx }: { msg: AIMessage; idx: number }) {
             : 'bg-glass border border-navy-700 text-gray-200'
         }`}
       >
-        <p className="text-sm leading-relaxed">{msg.content}</p>
+        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
       </div>
     </motion.div>
   );
@@ -149,44 +133,53 @@ export default function AITutorPage() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const getResponse = (userMsg: string): string => {
-    const lowerMsg = userMsg.toLowerCase();
-    for (const [key, value] of Object.entries(responseMap)) {
-      if (lowerMsg.includes(key)) {
-        return value;
+  const callGemini = async (userMessage: string): Promise<string> => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const systemPrompt = language_ === 'TAMIL'
+      ? 'நீங்கள் ARIVU என்ற AI ஆசிரியர். தமிழ்நாடு அரசு பணியாளர் தேர்வு வாரியம் (TNPSC) தேர்வுகளுக்கு மாணவர்களுக்கு உதவுகிறீர்கள். தமிழிலும் ஆங்கிலத்திலும் பதில் அளிக்கவும். TNPSC Group 1, 2, 2A, 4, VAO தேர்வு பாடங்கள் பற்றி விளக்கமாக பதில் அளிக்கவும்.'
+      : 'You are ARIVU, an AI tutor helping students prepare for Tamil Nadu Public Service Commission (TNPSC) exams including Group 1, 2, 2A, 4, and VAO. Answer clearly and helpfully about Tamil history, Indian constitution, geography, science, current affairs, and other TNPSC topics.';
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }
+          ],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+        }),
       }
-    }
-    return defaultResponse;
+    );
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'மன்னிக்கவும், பதில் கிடைக்கவில்லை. மீண்டும் முயற்சிக்கவும்.';
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMsg: AIMessage = {
-      role: 'user',
-      content: input,
-      timestamp: Date.now(),
-    };
-
+    if (!input.trim() || isTyping) return;
+    const userMsg: AIMessage = { role: 'user', content: input, timestamp: Date.now() };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
-
-    setTimeout(() => {
-      const response = getResponse(input);
-      const aiMsg: AIMessage = {
+    try {
+      const response = await callGemini(input);
+      const aiMsg: AIMessage = { role: 'assistant', content: response, timestamp: Date.now() };
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch {
+      const errMsg: AIMessage = {
         role: 'assistant',
-        content: response,
+        content: 'மன்னிக்கவும், இணைப்பு பிரச்சனை. சிறிது நேரம் பிறகு முயற்சிக்கவும்.',
         timestamp: Date.now(),
       };
-      setMessages((prev) => [...prev, aiMsg]);
+      setMessages((prev) => [...prev, errMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#0A0E1A] flex overflow-hidden">
-      {/* Sidebar Overlay */}
       <AnimatePresence>
         {isPanelOpen && (
           <motion.div
@@ -199,19 +192,14 @@ export default function AITutorPage() {
         )}
       </AnimatePresence>
 
-      {/* Left Panel - Conversation History (40%) */}
       <div className="hidden md:flex md:w-2/5 lg:w-1/3">
         <ConversationHistory isOpen={true} onClose={() => setIsPanelOpen(false)} />
       </div>
-
-      {/* Mobile Conversation Panel */}
       <div className="md:hidden z-40">
         <ConversationHistory isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
       </div>
 
-      {/* Right Panel - Chat (60%) */}
       <div className="flex-1 flex flex-col relative">
-        {/* Header */}
         <div className="bg-navy-900 border-b border-navy-800 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -225,20 +213,34 @@ export default function AITutorPage() {
                 <Brain className="w-4 h-4 text-navy-950" />
               </div>
               <div>
-                <h1 className="text-sm font-semibold text-white">{t('ARIVU', 'ARIVU')}</h1>
-                <p className="text-xs text-gray-400">{t('AI குரு', 'AI Tutor')}</p>
+                <h1 className="text-sm font-semibold text-white">ARIVU</h1>
+                <p className="text-xs text-green-400">● {t('இணைக்கப்பட்டது', 'Connected')} — Gemini AI</p>
               </div>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
-            <button className="badge-cyan cursor-pointer">
-              {language_ === 'TAMIL' ? '🇮🇳 தமிழ்' : '🇬🇧 English'}
-            </button>
+            <div className="flex items-center gap-1 bg-navy-800 rounded-lg px-2 py-1 border border-navy-700">
+              <button
+                onClick={() => setLanguage_('TAMIL')}
+                className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                  language_ === 'TAMIL' ? 'bg-brand-primary text-navy-950' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                தமிழ்
+              </button>
+              <div className="w-px h-4 bg-navy-700" />
+              <button
+                onClick={() => setLanguage_('ENGLISH')}
+                className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                  language_ === 'ENGLISH' ? 'bg-brand-primary text-navy-950' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Chat Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
           <AnimatePresence mode="popLayout">
             {messages.map((msg, idx) => (
@@ -249,14 +251,12 @@ export default function AITutorPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
         <div className="bg-navy-900 border-t border-navy-800 p-4 md:p-6 space-y-3">
-          {/* Textarea */}
           <div className="relative">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
@@ -268,51 +268,22 @@ export default function AITutorPage() {
               style={{ maxHeight: '120px', minHeight: '44px' }}
             />
           </div>
-
-          {/* Controls */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <button className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg transition-colors border border-navy-700 hover:border-brand-secondary">
+              <button className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg transition-colors border border-navy-700">
                 <Mic className="w-5 h-5 text-brand-secondary" />
               </button>
-              <button className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg transition-colors border border-navy-700 hover:border-brand-secondary">
+              <button className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg transition-colors border border-navy-700">
                 <Paperclip className="w-5 h-5 text-brand-secondary" />
               </button>
             </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-navy-800 rounded-lg px-2 py-1 border border-navy-700">
-                <button
-                  onClick={() => setLanguage_('TAMIL')}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                    language_ === 'TAMIL'
-                      ? 'bg-brand-primary text-navy-950'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  தமிழ்
-                </button>
-                <div className="w-px h-4 bg-navy-700" />
-                <button
-                  onClick={() => setLanguage_('ENGLISH')}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                    language_ === 'ENGLISH'
-                      ? 'bg-brand-primary text-navy-950'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  EN
-                </button>
-              </div>
-
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isTyping}
-                className="btn-primary p-2.5 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isTyping}
+              className="btn-primary p-2.5 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
