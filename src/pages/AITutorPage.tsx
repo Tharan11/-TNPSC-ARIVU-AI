@@ -1,18 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Mic, Paperclip, Zap, Plus, ChevronLeft, Brain, X } from 'lucide-react';
-import { useAppStore, useT } from '../store';
+import { Send, Mic, Paperclip, Zap, Plus, ChevronLeft, Brain } from 'lucide-react';
+import { useT } from '../store';
 import type { AIMessage } from '../lib/types';
 
-interface Conversation {
-  id: string;
-  title: string;
-  date: string;
-  mode: string;
-  isActive: boolean;
-}
-
-const mockConversations: Conversation[] = [
+const mockConversations = [
   { id: '1', title: 'தமிழ் நாட்டின் வரலாறு', date: 'Today', mode: 'CHAT', isActive: true },
   { id: '2', title: 'இந்திய அரசியலமைப்பு', date: 'Yesterday', mode: 'CHAT', isActive: false },
   { id: '3', title: 'புவியியல் கோட்டை', date: '2 days ago', mode: 'VOICE', isActive: false },
@@ -37,8 +29,7 @@ function ChatMessage({ msg, idx }: { msg: AIMessage; idx: number }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.05 }}
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
-    >
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isUser && (
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-amber-500 flex items-center justify-center mr-3 flex-shrink-0">
           <Zap className="w-4 h-4 text-navy-950" />
@@ -53,7 +44,6 @@ function ChatMessage({ msg, idx }: { msg: AIMessage; idx: number }) {
 
 export default function AITutorPage() {
   const t = useT();
-  const { language } = useAppStore();
   const [messages, setMessages] = useState<AIMessage[]>([{
     role: 'assistant',
     content: 'வணக்கம்! நான் ARIVU, உங்கள் AI பயிற்றி. TNPSC தேர்வுக்கு தயாரிப்பில் உங்களுக்கு உதவ எனக்கு மகிழ்ச்சி. என்ன பற்றி கற்க விரும்புகிறீர்கள்?',
@@ -61,7 +51,6 @@ export default function AITutorPage() {
   }]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [lang, setLang] = useState<'TAMIL' | 'ENGLISH'>('TAMIL');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -69,34 +58,34 @@ export default function AITutorPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const callGemini = async (userMessage: string): Promise<string> => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) throw new Error('API key missing');
-    
+  const callOpenAI = async (userMessage: string): Promise<string> => {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) throw new Error('OpenAI API key missing');
+
     const systemPrompt = lang === 'TAMIL'
-      ? 'நீங்கள் ARIVU என்ற AI ஆசிரியர். TNPSC தேர்வுகளுக்கு மாணவர்களுக்கு உதவுகிறீர்கள். தமிழிலும் ஆங்கிலத்திலும் பதில் அளிக்கவும்.'
+      ? 'நீங்கள் ARIVU என்ற AI ஆசிரியர். TNPSC தேர்வுகளுக்கு மாணவர்களுக்கு உதவுகிறீர்கள். தமிழிலும் ஆங்கிலத்திலும் பதில் அளிக்கவும். TNPSC Group 1, 2, 2A, 4, VAO தேர்வு பாடங்கள் பற்றி விளக்கமாக பதில் அளிக்கவும்.'
       : 'You are ARIVU, an AI tutor helping students prepare for TNPSC exams. Answer clearly about Tamil history, Indian constitution, geography, science, and current affairs.';
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gpt-3.5-turbo:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
-        })
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || 'API Error');
-    }
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ],
+        max_tokens: 1024,
+        temperature: 0.7
+      })
+    });
 
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'பதில் கிடைக்கவில்லை';
+    if (!res.ok) throw new Error(data.error?.message || 'API Error');
+    return data.choices?.[0]?.message?.content || 'பதில் கிடைக்கவில்லை';
   };
 
   const handleSend = async () => {
@@ -106,10 +95,10 @@ export default function AITutorPage() {
     setInput('');
     setIsTyping(true);
     try {
-      const response = await callGemini(input);
+      const response = await callOpenAI(input);
       setMessages(prev => [...prev, { role: 'assistant', content: response, timestamp: Date.now() }]);
     } catch (e: any) {
-      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${e.message}. API key check pannunga.`, timestamp: Date.now() }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${e.message}`, timestamp: Date.now() }]);
     } finally {
       setIsTyping(false);
     }
@@ -118,7 +107,7 @@ export default function AITutorPage() {
   return (
     <div className="min-h-screen bg-[#0A0E1A] flex overflow-hidden">
       <div className="hidden md:flex md:w-64 flex-col bg-navy-900 border-r border-navy-800">
-        <div className="p-4 border-b border-navy-800 flex items-center justify-between">
+        <div className="p-4 border-b border-navy-800">
           <h2 className="text-lg font-semibold text-white">{t('கலந்துரையாடல்கள்', 'Conversations')}</h2>
         </div>
         <button className="m-4 flex items-center justify-center gap-2 btn-primary">
@@ -129,7 +118,7 @@ export default function AITutorPage() {
           {mockConversations.map(conv => (
             <motion.button key={conv.id} whileHover={{ x: 4 }}
               className={`w-full text-left p-3 rounded-lg transition-all ${conv.isActive ? 'bg-brand-primary/20 border border-brand-primary/40' : 'bg-navy-800 border border-navy-700'}`}>
-              <p className="text-sm font-medium text-white truncate tamil">{conv.title}</p>
+              <p className="text-sm font-medium text-white truncate">{conv.title}</p>
               <p className="text-xs text-gray-400 mt-1">{conv.date}</p>
             </motion.button>
           ))}
@@ -139,15 +128,12 @@ export default function AITutorPage() {
       <div className="flex-1 flex flex-col">
         <div className="bg-navy-900 border-b border-navy-800 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setIsPanelOpen(!isPanelOpen)} className="md:hidden p-2 hover:bg-navy-800 rounded-lg">
-              <ChevronLeft className="w-5 h-5 text-brand-primary" />
-            </button>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-amber-500 flex items-center justify-center">
               <Brain className="w-4 h-4 text-navy-950" />
             </div>
             <div>
               <h1 className="text-sm font-semibold text-white">ARIVU</h1>
-              <p className="text-xs text-green-400">● {t('இணைக்கப்பட்டது', 'Connected')} — Gemini AI</p>
+              <p className="text-xs text-green-400">● {t('இணைக்கப்பட்டது', 'Connected')} — OpenAI GPT</p>
             </div>
           </div>
           <div className="flex items-center gap-1 bg-navy-800 rounded-lg px-2 py-1 border border-navy-700">
