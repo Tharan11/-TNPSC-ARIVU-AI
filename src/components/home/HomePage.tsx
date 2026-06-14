@@ -141,6 +141,10 @@ function HeroSection() {
                   English
                 </button>
               </div>
+              <Link to="/ai-tutor" className="btn-primary flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                {t('AI ஆசிரியரை இலவசமாக முயற்சிக்கவும்', 'Try AI Tutor Free')}
+              </Link>
               <Link to="/exams" className="btn-secondary flex items-center justify-center gap-2">
                 {t('தேர்வுகளைப் பார்', 'Explore Exams')}
                 <ChevronRight className="w-4 h-4" />
