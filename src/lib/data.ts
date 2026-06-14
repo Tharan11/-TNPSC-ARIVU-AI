@@ -26,6 +26,21 @@ export const MOCK_EXAMS: Exam[] = [
     group: 'VAO', description: 'Village Administrative Officer',
     vacancyCount: 500, examDate: '2026-10-05',
   },
+  {
+    id: '6', slug: 'engineering', name: 'TNPSC Engineering Services', nameTamil: 'TNPSC பொறியியல் சேவைகள்',
+    group: 'ENGINEERING', description: 'Assistant Engineer (Civil/Mechanical/Electrical) in PWD, Highways, TWAD Board',
+    vacancyCount: 320, examDate: '2026-09-25',
+  },
+  {
+    id: '7', slug: 'forest', name: 'TNPSC Forest Department', nameTamil: 'TNPSC வனத்துறை',
+    group: 'FOREST', description: 'Forester, Forest Guard, Range Officer recruitment',
+    vacancyCount: 180, examDate: '2026-08-30',
+  },
+  {
+    id: '8', slug: 'police', name: 'TNPSC Police Recruitment', nameTamil: 'TNPSC காவல்துறை',
+    group: 'POLICE', description: 'Sub Inspector, Sergeant and other Tamil Nadu Police posts',
+    vacancyCount: 950, examDate: '2026-11-12',
+  },
 ];
 
 export const MOCK_QUESTIONS: Question[] = [

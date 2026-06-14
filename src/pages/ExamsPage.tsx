@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Crown, Shield, ShieldCheck, FileText, Landmark, Wrench, TreePine,
@@ -45,6 +45,53 @@ export default function ExamsPage() {
               )}
             </p>
           </motion.div>
+
+          {/* Selected Exam Detail Hero (when /exams/:slug) */}
+          {selectedExam && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-16 bg-[#111827] border border-brand-primary/30 rounded-2xl p-6 sm:p-8 ring-glow-gold"
+            >
+              <button
+                onClick={() => navigate('/exams')}
+                className="text-sm text-gray-400 hover:text-brand-primary mb-4 inline-flex items-center gap-1"
+              >
+                ← {t('அனைத்து தேர்வுகள்', 'All Exams')}
+              </button>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{selectedExam.name}</h2>
+              <p className="tamil text-sm text-gray-500 mb-4">{selectedExam.nameTamil}</p>
+              <p className="text-gray-300 mb-6 leading-relaxed">{selectedExam.description}</p>
+              <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                {selectedExam.vacancyCount && (
+                  <div className="bg-[#0A0E1A] rounded-lg p-4 border border-white/5">
+                    <p className="text-xs text-gray-500 mb-1">{t('இடங்கள்', 'Vacancies')}</p>
+                    <p className="text-2xl font-bold text-brand-primary">{selectedExam.vacancyCount.toLocaleString()}</p>
+                  </div>
+                )}
+                {selectedExam.examDate && (
+                  <div className="bg-[#0A0E1A] rounded-lg p-4 border border-white/5">
+                    <p className="text-xs text-gray-500 mb-1">{t('தேர்வு தேதி', 'Exam Date')}</p>
+                    <p className="text-lg font-bold text-brand-secondary">{new Date(selectedExam.examDate).toLocaleDateString('en-GB')}</p>
+                  </div>
+                )}
+                <div className="bg-[#0A0E1A] rounded-lg p-4 border border-white/5">
+                  <p className="text-xs text-gray-500 mb-1">{t('நிலை', 'Difficulty')}</p>
+                  <p className={`text-lg font-bold ${DIFFICULTY_MAP[selectedExam.group]?.color || 'text-amber-400'}`}>
+                    {t(DIFFICULTY_MAP[selectedExam.group]?.ta || 'உயர்', DIFFICULTY_MAP[selectedExam.group]?.en || 'High')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/tests" className="btn-primary inline-flex items-center gap-2">
+                  {t('மாக் தேர்வு தொடங்கு', 'Start Mock Test')} <Target className="w-4 h-4" />
+                </Link>
+                <Link to="/ai-tutor" className="btn-secondary inline-flex items-center gap-2">
+                  {t('AI ஆசிரியரிடம் கேள்', 'Ask AI Tutor')} <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </motion.div>
+          )}
 
           {/* Exam Grid */}
           <motion.div
@@ -98,7 +145,7 @@ export default function ExamsPage() {
                       )}
 
                       <div className="flex items-center gap-1 text-sm font-medium transition-colors group-hover:text-brand-primary" style={{ color: group.color }}>
-                        <span>{t('ஆராயு', 'Explore')}</span>
+                        <span>{t('ஆராய்க', 'Explore')}</span>
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
@@ -157,12 +204,20 @@ export default function ExamsPage() {
                   </div>
                 </div>
 
-                <Link
-                  to={`/exams/${exam.slug}`}
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  {t('விரிவாக அறிக', 'Learn More')} <ArrowRight className="w-4 h-4" />
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    to={`/exams/${exam.slug}`}
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    {t('விரிவாக அறிக', 'Learn More')} <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    to="/tests"
+                    className="btn-secondary inline-flex items-center gap-2"
+                  >
+                    {t('மாக் தேர்வு தொடங்கு', 'Start Mock Test')} <Target className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
             ))}
           </motion.div>
