@@ -78,7 +78,7 @@ export default function AITutorPage() {
       : 'You are ARIVU, an AI tutor helping students prepare for TNPSC exams. Answer clearly about Tamil history, Indian constitution, geography, science, and current affairs.';
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gpt-3.5-turbo:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
