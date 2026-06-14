@@ -133,6 +133,7 @@ export default function AITutorPage() {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  // old function removed
   const callGemini = async (userMessage: string): Promise<string> => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     const systemPrompt = language_ === 'TAMIL'
