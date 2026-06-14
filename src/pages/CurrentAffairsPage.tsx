@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Search, Download, Star, ArrowRight, ChevronLeft, ChevronRight
+  Search, Star, ArrowRight, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useT, useAppStore } from '../store';
 import { MOCK_CURRENT_AFFAIRS } from '../lib/data';
@@ -24,20 +24,48 @@ const CATEGORY_COLORS: Record<CACategory, string> = {
   SCHEME: '#06B6D4',
 };
 
+const CATEGORY_LABELS: Record<CACategory, { ta: string; en: string }> = {
+  NATIONAL: { ta: 'தேசியம்', en: 'National' },
+  INTERNATIONAL: { ta: 'சர்வதேசம்', en: 'International' },
+  TAMILNADU: { ta: 'தமிழ்நாடு', en: 'Tamil Nadu' },
+  ECONOMY: { ta: 'பொருளாதாரம்', en: 'Economy' },
+  SCIENCE: { ta: 'அறிவியல்', en: 'Science' },
+  ENVIRONMENT: { ta: 'சுற்றுச்சூழல்', en: 'Environment' },
+  SPORTS: { ta: 'விளையாட்டு', en: 'Sports' },
+  POLITICS: { ta: 'அரசியல்', en: 'Politics' },
+  SCHEME: { ta: 'திட்டங்கள்', en: 'Scheme' },
+};
+
 export default function CurrentAffairsPage() {
   const t = useT();
   const { language } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<CACategory | null>(null);
-  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'all'>('today');
+  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'all'>('all');
+  const [selectedAffair, setSelectedAffair] = useState<typeof MOCK_CURRENT_AFFAIRS[number] | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
 
   const filteredAffairs = MOCK_CURRENT_AFFAIRS.filter(ca => {
     const matchesCategory = !selectedCategory || ca.category === selectedCategory;
     const matchesSearch = searchQuery === '' ||
       ca.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ca.titleTamil.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+
+    const affairDate = new Date(ca.date);
+    const now = new Date();
+    const daysDiff = (now.getTime() - affairDate.getTime()) / (1000 * 60 * 60 * 24);
+    const matchesDate =
+      dateFilter === 'all' ? true :
+      dateFilter === 'today' ? daysDiff < 1 :
+      dateFilter === 'week' ? daysDiff < 7 :
+      daysDiff < 31;
+
+    return matchesCategory && matchesSearch && matchesDate;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredAffairs.length / PAGE_SIZE));
+  const paginatedAffairs = filteredAffairs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-[#0A0E1A]">
@@ -67,7 +95,7 @@ export default function CurrentAffairsPage() {
               type="text"
               placeholder={t('தேடு...', 'Search...')}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               className="w-full bg-[#111827] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-secondary/50 transition-colors"
             />
           </div>
@@ -77,7 +105,7 @@ export default function CurrentAffairsPage() {
             {(['today', 'week', 'month', 'all'] as const).map((filter) => (
               <button
                 key={filter}
-                onClick={() => setDateFilter(filter)}
+                onClick={() => { setDateFilter(filter); setCurrentPage(1); }}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                   dateFilter === filter
                     ? 'btn-primary'
@@ -95,7 +123,7 @@ export default function CurrentAffairsPage() {
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2 pb-4">
             <button
-              onClick={() => setSelectedCategory(null)}
+              onClick={() => { setSelectedCategory(null); setCurrentPage(1); }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 selectedCategory === null
                   ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40'
@@ -107,7 +135,7 @@ export default function CurrentAffairsPage() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                onClick={() => { setSelectedCategory(selectedCategory === cat ? null : cat); setCurrentPage(1); }}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   selectedCategory === cat
                     ? 'text-white border-2'
@@ -119,7 +147,7 @@ export default function CurrentAffairsPage() {
                   color: selectedCategory === cat ? CATEGORY_COLORS[cat] : undefined,
                 }}
               >
-                {cat}
+                {t(CATEGORY_LABELS[cat].ta, CATEGORY_LABELS[cat].en)}
               </button>
             ))}
           </div>
@@ -130,23 +158,19 @@ export default function CurrentAffairsPage() {
       <section className="py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           {/* Download Button */}
-          <div className="flex justify-end mb-6">
-            <button className="btn-secondary flex items-center gap-2 text-sm">
-              <Download className="w-4 h-4" />
-              {t('மாத PDF பதிவிறக்கம்', 'Download Monthly PDF')}
-            </button>
-          </div>
+          {/* Download PDF - hidden until backend export is ready */}
 
           {/* Cards List */}
           <div className="space-y-4">
             {filteredAffairs.length > 0 ? (
-              filteredAffairs.map((affair, i) => (
+              paginatedAffairs.map((affair, i) => (
                 <motion.div
                   key={affair.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   className="card group cursor-pointer hover:border-brand-secondary/40"
+                  onClick={() => setSelectedAffair(affair)}
                 >
                   <div className="flex items-start gap-4">
                     <div
@@ -174,7 +198,7 @@ export default function CurrentAffairsPage() {
                             border: `1px solid ${CATEGORY_COLORS[affair.category]}40`,
                           }}
                         >
-                          {affair.category}
+                          {t(CATEGORY_LABELS[affair.category].ta, CATEGORY_LABELS[affair.category].en)}
                         </span>
                         <div className="flex gap-0.5">
                           {Array.from({ length: 5 }).map((_, j) => (
@@ -216,17 +240,22 @@ export default function CurrentAffairsPage() {
           </div>
 
           {/* Pagination */}
-          {filteredAffairs.length > 0 && (
+          {filteredAffairs.length > 0 && totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-8">
-              <button className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40"
+              >
                 <ChevronLeft className="w-5 h-5 text-gray-400" />
               </button>
               <div className="flex gap-1">
-                {[1, 2, 3].map((i) => (
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((i) => (
                   <button
                     key={i}
+                    onClick={() => setCurrentPage(i)}
                     className={`w-10 h-10 rounded-lg font-medium transition-all ${
-                      i === 1
+                      i === currentPage
                         ? 'btn-primary'
                         : 'bg-[#111827] text-gray-400 border border-white/10 hover:border-white/20'
                     }`}
@@ -235,9 +264,54 @@ export default function CurrentAffairsPage() {
                   </button>
                 ))}
               </div>
-              <button className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors">
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40"
+              >
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
+            </div>
+          )}
+
+          {/* Detail Modal */}
+          {selectedAffair && (
+            <div
+              className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+              onClick={() => setSelectedAffair(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-[#111827] border border-white/10 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"
+              >
+                <span
+                  className="badge-gold text-xs inline-block mb-3"
+                  style={{
+                    backgroundColor: `${CATEGORY_COLORS[selectedAffair.category]}20`,
+                    color: CATEGORY_COLORS[selectedAffair.category],
+                    border: `1px solid ${CATEGORY_COLORS[selectedAffair.category]}40`,
+                  }}
+                >
+                  {t(CATEGORY_LABELS[selectedAffair.category].ta, CATEGORY_LABELS[selectedAffair.category].en)}
+                </span>
+                <h2 className="text-xl font-bold text-white mb-2 tamil">
+                  {language === 'TAMIL' ? selectedAffair.titleTamil : selectedAffair.title}
+                </h2>
+                <p className="text-xs text-gray-500 mb-4">
+                  {new Date(selectedAffair.date).toLocaleDateString('en-GB')}
+                </p>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  {language === 'TAMIL' ? selectedAffair.summaryTamil : selectedAffair.summary}
+                </p>
+                <button
+                  onClick={() => setSelectedAffair(null)}
+                  className="btn-secondary mt-6 w-full"
+                >
+                  {t('மூடு', 'Close')}
+                </button>
+              </motion.div>
             </div>
           )}
         </div>
