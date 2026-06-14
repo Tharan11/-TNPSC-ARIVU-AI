@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -30,6 +30,7 @@ function HeroSection() {
   const phraseRef = useRef(0);
   const charRef = useRef(0);
   const deletingRef = useRef(false);
+  const pauseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,8 +39,13 @@ function HeroSection() {
         charRef.current++;
         setTypewriter(current.substring(0, charRef.current));
         if (charRef.current === current.length) {
-          deletingRef.current = true;
-          setTimeout(() => { }, 1500);
+          if (!pauseRef.current) {
+            pauseRef.current = setTimeout(() => {
+              deletingRef.current = true;
+              pauseRef.current = null;
+            }, 1500);
+          }
+          return;
         }
       } else {
         charRef.current--;
@@ -633,18 +639,18 @@ function FeaturesComparison() {
 
             {/* Rows */}
             {features.map((f) => (
-              <>
-                <div key={`${f.name}-label`} className="p-3 border-t border-white/5 text-sm text-gray-300">{f.name}</div>
-                <div key={`${f.name}-arivu`} className="p-3 border-t border-brand-primary/20 text-center">
+              <Fragment key={f.name}>
+                <div className="p-3 border-t border-white/5 text-sm text-gray-300">{f.name}</div>
+                <div className="p-3 border-t border-brand-primary/20 text-center">
                   {f.arivu ? <span className="text-success text-lg">✓</span> : <span className="text-gray-600">—</span>}
                 </div>
-                <div key={`${f.name}-testbook`} className="p-3 border-t border-white/5 text-center">
+                <div className="p-3 border-t border-white/5 text-center">
                   {f.testbook ? <span className="text-success text-lg">✓</span> : <span className="text-error text-lg">✗</span>}
                 </div>
-                <div key={`${f.name}-winmeen`} className="p-3 border-t border-white/5 text-center">
+                <div className="p-3 border-t border-white/5 text-center">
                   {f.winmeen ? <span className="text-success text-lg">✓</span> : <span className="text-error text-lg">✗</span>}
                 </div>
-              </>
+              </Fragment>
             ))}
           </div>
         </div>
