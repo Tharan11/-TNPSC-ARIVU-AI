@@ -59,21 +59,21 @@ export default function AITutorPage() {
   }, [messages, isTyping]);
 
   const callOpenAI = async (userMessage: string): Promise<string> => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
     if (!apiKey) throw new Error('OpenAI API key missing');
 
     const systemPrompt = lang === 'TAMIL'
       ? 'நீங்கள் ARIVU என்ற AI ஆசிரியர். TNPSC தேர்வுகளுக்கு மாணவர்களுக்கு உதவுகிறீர்கள். தமிழிலும் ஆங்கிலத்திலும் பதில் அளிக்கவும். TNPSC Group 1, 2, 2A, 4, VAO தேர்வு பாடங்கள் பற்றி விளக்கமாக பதில் அளிக்கவும்.'
       : 'You are ARIVU, an AI tutor helping students prepare for TNPSC exams. Answer clearly about Tamil history, Indian constitution, geography, science, and current affairs.';
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'llama3-8b-8192',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
