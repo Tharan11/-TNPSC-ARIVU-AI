@@ -59,33 +59,15 @@ export default function AITutorPage() {
   }, [messages, isTyping]);
 
   const callOpenAI = async (userMessage: string): Promise<string> => {
-    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-    if (!apiKey) throw new Error('OpenAI API key missing');
-
-    const systemPrompt = lang === 'TAMIL'
-      ? 'நீங்கள் ARIVU என்ற AI ஆசிரியர். TNPSC தேர்வுகளுக்கு மாணவர்களுக்கு உதவுகிறீர்கள். தமிழிலும் ஆங்கிலத்திலும் பதில் அளிக்கவும். TNPSC Group 1, 2, 2A, 4, VAO தேர்வு பாடங்கள் பற்றி விளக்கமாக பதில் அளிக்கவும்.'
-      : 'You are ARIVU, an AI tutor helping students prepare for TNPSC exams. Answer clearly about Tamil history, Indian constitution, geography, science, and current affairs.';
-
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch('/api/ai-tutor', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage }
-        ],
-        max_tokens: 1024,
-        temperature: 0.7
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessage, lang })
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'API Error');
-    return data.choices?.[0]?.message?.content || 'பதில் கிடைக்கவில்லை';
+    if (!res.ok) throw new Error(data.error || 'API Error');
+    return data.reply || 'பதில் கிடைக்கவில்லை';
   };
 
   const handleSend = async () => {
