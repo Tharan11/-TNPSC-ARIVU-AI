@@ -115,7 +115,7 @@ export default function AITutorPage() {
             </div>
             <div>
               <h1 className="text-sm font-semibold text-white">ARIVU</h1>
-              <p className="text-xs text-green-400">● {t('இணைக்கப்பட்டது', 'Connected')} — OpenAI GPT</p>
+              <p className="text-xs text-green-400">● {t('இணைக்கப்பட்டது', 'Connected')} — Groq AI</p>
             </div>
           </div>
           <div className="flex items-center gap-1 bg-navy-800 rounded-lg px-2 py-1 border border-navy-700">
