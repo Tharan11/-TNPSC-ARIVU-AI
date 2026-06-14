@@ -140,7 +140,7 @@ export default function AITutorPage() {
       : 'You are ARIVU, an AI tutor helping students prepare for Tamil Nadu Public Service Commission (TNPSC) exams including Group 1, 2, 2A, 4, and VAO. Answer clearly and helpfully about Tamil history, Indian constitution, geography, science, current affairs, and other TNPSC topics.';
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
