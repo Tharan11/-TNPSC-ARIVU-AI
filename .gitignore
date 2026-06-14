@@ -25,3 +25,6 @@ dist-ssr
 .vercel
 .env*
 .env
+generate_questions.cjs
+generate_questions.js
+new_questions.json

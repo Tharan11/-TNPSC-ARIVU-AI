@@ -67,9 +67,8 @@ export default function CommunityPage() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
-                    activeTab === tab ? 'btn-primary' : 'bg-[#111827] text-gray-400 border border-white/10'
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${activeTab === tab ? 'btn-primary' : 'bg-[#111827] text-gray-400 border border-white/10'
+                    }`}
                 >
                   <Icon className="w-4 h-4" /> {labels[tab]}
                 </button>

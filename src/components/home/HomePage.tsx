@@ -39,7 +39,7 @@ function HeroSection() {
         setTypewriter(current.substring(0, charRef.current));
         if (charRef.current === current.length) {
           deletingRef.current = true;
-          setTimeout(() => {}, 1500);
+          setTimeout(() => { }, 1500);
         }
       } else {
         charRef.current--;
@@ -118,21 +118,19 @@ function HeroSection() {
               <div className="flex items-center bg-navy-800 rounded-xl p-1 border border-white/10">
                 <button
                   onClick={() => setLanguage('TAMIL')}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    language === 'TAMIL'
+                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${language === 'TAMIL'
                       ? 'bg-brand-primary text-navy-950 shadow-lg'
                       : 'text-gray-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   தமிழ்
                 </button>
                 <button
                   onClick={() => setLanguage('ENGLISH')}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    language === 'ENGLISH'
+                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${language === 'ENGLISH'
                       ? 'bg-brand-primary text-navy-950 shadow-lg'
                       : 'text-gray-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   English
                 </button>
@@ -253,9 +251,8 @@ function NotificationTicker() {
                 <Link
                   key={`${n.id}-${i}`}
                   to={`/notifications/${n.id}`}
-                  className={`inline-flex items-center gap-2 text-sm transition-colors ${
-                    n.isUrgent ? 'text-red-400 font-medium' : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`inline-flex items-center gap-2 text-sm transition-colors ${n.isUrgent ? 'text-red-400 font-medium' : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   {n.isUrgent && <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />}
                   {t(n.titleTamil, n.title)}
@@ -407,9 +404,8 @@ function DailyQuiz() {
           {/* Progress */}
           <div className="flex items-center gap-2 mb-4">
             {questions.map((_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
-                i < currentQ ? 'bg-brand-primary' : i === currentQ ? 'bg-brand-primary/50' : 'bg-white/10'
-              }`} />
+              <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < currentQ ? 'bg-brand-primary' : i === currentQ ? 'bg-brand-primary/50' : 'bg-white/10'
+                }`} />
             ))}
           </div>
 
@@ -567,17 +563,15 @@ function LeaderboardPreview() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`contents [&>*]:py-2.5 [&>*]:px-4 ${
-                  i < MOCK_LEADERBOARD.length - 1 ? '[&>*]:border-b [&>*]:border-white/5' : ''
-                }`}
+                className={`contents [&>*]:py-2.5 [&>*]:px-4 ${i < MOCK_LEADERBOARD.length - 1 ? '[&>*]:border-b [&>*]:border-white/5' : ''
+                  }`}
               >
                 <div className="flex items-center">
-                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                    entry.rank === 1 ? 'bg-brand-primary/20 text-brand-primary' :
-                    entry.rank === 2 ? 'bg-gray-400/20 text-gray-400' :
-                    entry.rank === 3 ? 'bg-amber-700/20 text-amber-600' :
-                    'bg-white/5 text-gray-500'
-                  }`}>
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${entry.rank === 1 ? 'bg-brand-primary/20 text-brand-primary' :
+                      entry.rank === 2 ? 'bg-gray-400/20 text-gray-400' :
+                        entry.rank === 3 ? 'bg-amber-700/20 text-amber-600' :
+                          'bg-white/5 text-gray-500'
+                    }`}>
                     {entry.rank}
                   </span>
                 </div>

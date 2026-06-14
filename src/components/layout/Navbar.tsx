@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, User, LogOut, Settings, ChevronDown, BookOpen, Zap } from 'lucide-react';
+import { Menu, X, Bell, User, LogOut, Settings, ChevronDown, BookOpen } from 'lucide-react';
 import { useAppStore, useT } from '../../store';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -38,8 +38,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Zap className="w-5 h-5 text-[#0A0E1A]" />
+            <div className="w-9 h-9 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+              <img src="/logo-icon.svg" alt="ARIVU AI" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold text-white leading-tight tracking-wide">ARIVU</span>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Zap, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useT } from '../../store';
 
 export default function Footer() {
@@ -54,8 +54,8 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-[#0A0E1A]" />
+              <div className="w-9 h-9 rounded-lg overflow-hidden">
+                <img src="/logo-icon.svg" alt="ARIVU AI" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-white leading-tight">ARIVU</span>

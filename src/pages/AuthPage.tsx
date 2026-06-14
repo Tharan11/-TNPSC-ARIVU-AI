@@ -138,17 +138,15 @@ export default function AuthPage() {
           <div className="flex gap-2 mb-8 bg-navy-900 rounded-lg p-1">
             <button
               onClick={() => { setTab('login'); setGlobalError(''); }}
-              className={`flex-1 py-2.5 rounded-md font-medium transition-all ${
-                tab === 'login' ? 'bg-brand-primary text-navy-950' : 'text-text-secondary hover:text-text-primary'
-              }`}
+              className={`flex-1 py-2.5 rounded-md font-medium transition-all ${tab === 'login' ? 'bg-brand-primary text-navy-950' : 'text-text-secondary hover:text-text-primary'
+                }`}
             >
               {t('உள்நுழைய', 'Login')}
             </button>
             <button
               onClick={() => { setTab('register'); setGlobalError(''); }}
-              className={`flex-1 py-2.5 rounded-md font-medium transition-all ${
-                tab === 'register' ? 'bg-brand-primary text-navy-950' : 'text-text-secondary hover:text-text-primary'
-              }`}
+              className={`flex-1 py-2.5 rounded-md font-medium transition-all ${tab === 'register' ? 'bg-brand-primary text-navy-950' : 'text-text-secondary hover:text-text-primary'
+                }`}
             >
               {t('பதிவு', 'Register')}
             </button>

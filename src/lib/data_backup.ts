@@ -199,6 +199,3 @@ export const MOCK_ACHIEVEMENTS: Achievement[] = [
   { id: 'a5', name: 'Helper', nameTamil: 'உதவியாளர்', description: 'Get 100 upvotes in community', descTamil: 'சமூகத்தில் 100 வாக்குகள்', icon: 'Heart', xpReward: 200, rarity: 'RARE' },
   { id: 'a6', name: 'Scholar', nameTamil: 'ஆய்வாளர்', description: 'Read 365 daily current affairs', descTamil: '365 அன்றாட நிகழ்வுகளைப் படிக்கவும்', icon: 'BookOpen', xpReward: 1000, rarity: 'LEGENDARY' },
 ];
-
-// ===== 91 NEW TNPSC QUESTIONS =====
-export const EXTRA_QUESTIONS: Question[] = [];
