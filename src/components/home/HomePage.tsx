@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Fragment } from 'react';
+import { useState, useEffect, useRef, Fragment, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -367,7 +367,39 @@ function DailyQuiz() {
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const questions = MOCK_QUESTIONS.slice(0, 5);
+  const questions = useMemo(() => {
+    // Seeded PRNG (mulberry32)
+    const mulberry32 = (seed: number) => {
+      return () => {
+        seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    // Date seed (changes daily, e.g. 20260614)
+    const today = new Date();
+    const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+
+    // Per-browser user seed (persisted)
+    let userSeed = Number(localStorage.getItem('arivu_quiz_seed'));
+    if (!userSeed) {
+      userSeed = Math.floor(Math.random() * 1000000);
+      localStorage.setItem('arivu_quiz_seed', String(userSeed));
+    }
+
+    const rand = mulberry32(dateSeed + userSeed);
+
+    // Fisher-Yates shuffle using seeded rand
+    const pool = [...MOCK_QUESTIONS];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    return pool.slice(0, Math.min(10, pool.length));
+  }, []);
 
   const handleSelect = (optId: string) => {
     if (selected) return;
