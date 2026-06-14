@@ -9,7 +9,7 @@ import { MOCK_QUESTIONS } from '../lib/data';
 import { formatTime, cn } from '../lib/utils';
 
 type TestMode = 'HUB' | 'ACTIVE' | 'RESULTS';
-type FilterType = 'All' | 'FULL_MOCK' | 'DAILY' | 'TOPIC' | 'SUBJECT';
+type FilterType = 'All' | 'FULL_MOCK' | 'DAILY' | 'TOPIC' | 'SUBJECT' | 'ADAPTIVE' | 'GRAND';
 
 // Mock test data
 const MOCK_TESTS: Test[] = [
@@ -129,7 +129,7 @@ function TestHub({ tests, onStart }: { tests: Test[]; onStart: (test: Test) => v
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       {/* Filter Tabs */}
       <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
-        {['All', 'FULL_MOCK', 'DAILY', 'TOPIC', 'SUBJECT'].map((f) => (
+        {['All', 'FULL_MOCK', 'DAILY', 'TOPIC', 'SUBJECT', 'ADAPTIVE', 'GRAND'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f as FilterType)}
@@ -178,7 +178,11 @@ function TestHub({ tests, onStart }: { tests: Test[]; onStart: (test: Test) => v
                   <span>{test.questionCount} questions</span>
                 </div>
                 <div className="text-xs text-gray-400">
-                  <span>-1/{Math.round(1 / (test.negativeMarks as number))}</span>
+                  <span>
+                    {test.negativeMarks > 0
+                      ? `-1/${Math.round(1 / (test.negativeMarks as number))}`
+                      : t('எதிர்மறை மதிப்பெண் இல்லை', 'No negative marking')}
+                  </span>
                 </div>
               </div>
 
