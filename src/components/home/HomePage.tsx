@@ -166,6 +166,29 @@ function HeroSection() {
                 </span>
               </div>
             </div>
+            {/* Mobile Stats Card */}
+            <div className="grid grid-cols-4 gap-2 mt-6 lg:hidden">
+              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
+                <Flame className="w-5 h-5 text-brand-primary mb-1 mx-auto" />
+                <p className="text-lg font-bold text-white">7</p>
+                <p className="text-[10px] text-gray-400">{t('தொடர்ச்சி', 'Streak')}</p>
+              </div>
+              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
+                <Trophy className="w-5 h-5 text-brand-secondary mb-1 mx-auto" />
+                <p className="text-lg font-bold text-white">#42</p>
+                <p className="text-[10px] text-gray-400">{t('தரவரிசை', 'Rank')}</p>
+              </div>
+              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
+                <Star className="w-5 h-5 text-success mb-1 mx-auto" />
+                <p className="text-lg font-bold text-white">87%</p>
+                <p className="text-[10px] text-gray-400">{t('துல்லியம்', 'Accuracy')}</p>
+              </div>
+              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
+                <Brain className="w-5 h-5 text-brand-accent mb-1 mx-auto" />
+                <p className="text-lg font-bold text-white">2,340</p>
+                <p className="text-[10px] text-gray-400">XP</p>
+              </div>
+            </div>
           </motion.div>
 
           {/* Right - Visual */}
