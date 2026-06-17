@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Zap, Crown, Shield, ShieldCheck, FileText, Landmark, Wrench, TreePine,
-  ChevronRight, Trophy, Flame, Star,
-  ArrowRight, Bell, Sparkles, Target, Brain
+  ChevronRight, Trophy, Flame, Star, ArrowRight, Bell, Sparkles, Target,
+  Brain, Play, BookOpen, CheckCircle2, Award, Clock, RefreshCw, HelpCircle,
+  Twitter, Globe
 } from 'lucide-react';
 import { useAppStore, useT } from '../../store';
 import { EXAM_GROUPS } from '../../lib/types';
@@ -12,19 +13,13 @@ import { MOCK_QUESTIONS, MOCK_NOTIFICATIONS, MOCK_CURRENT_AFFAIRS, MOCK_LEADERBO
 import { formatNumber } from '../../lib/utils';
 
 const ICON_MAP: Record<string, React.FC<any>> = {
-  Crown, Shield, ShieldCheck, FileText, Landmark, Wrench, TreePine,
-  Siren: Shield,
-};
-
-const stagger = {
-  container: { transition: { staggerChildren: 0.1 } },
-  item: { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5 } },
+  Crown, Shield, ShieldCheck, FileText, Landmark, Wrench, TreePine, Siren: Shield,
 };
 
 function HeroSection() {
   const t = useT();
   const navigate = useNavigate();
-  const { isAuthenticated, language, setLanguage } = useAppStore();
+  const { language, isAuthenticated } = useAppStore();
   const [typewriter, setTypewriter] = useState('');
   const phrases = ['Group 1', 'Group 2', 'Group 2A', 'Group 4', 'VAO', 'Engineering Services'];
   const phraseRef = useRef(0);
@@ -40,10 +35,7 @@ function HeroSection() {
         setTypewriter(current.substring(0, charRef.current));
         if (charRef.current === current.length) {
           if (!pauseRef.current) {
-            pauseRef.current = setTimeout(() => {
-              deletingRef.current = true;
-              pauseRef.current = null;
-            }, 1500);
+            pauseRef.current = setTimeout(() => { deletingRef.current = true; pauseRef.current = null; }, 1500);
           }
           return;
         }
@@ -63,201 +55,132 @@ function HeroSection() {
   const testsToday = 8234 + Math.floor(Math.random() * 30);
 
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/5 via-transparent to-transparent" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-brand-secondary/5 rounded-full blur-3xl" />
-        {/* Geometric Pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.03]" viewBox="0 0 1000 1000">
-          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="0.5" />
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
+    <section className="relative overflow-hidden bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-700 dark:border-gray-800 py-16 lg:py-24">
+      <div className="absolute inset-0 " />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="grid lg:grid-cols-12 gap-12 items-center">
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left - Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-6">
-              <Sparkles className="w-4 h-4 text-brand-primary" />
-              <span className="text-xs font-medium text-brand-primary">
-                {t('AI-ஆல் இயக்கப்படும் இலவச தளம்', 'AI-Powered Free Platform')}
-              </span>
+          {/* Left */}
+          <div className="lg:col-span-7 text-center lg:text-left">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-red-50 border border-red-100 rounded-full text-xs font-bold text-red-600 mb-6 uppercase tracking-wide">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              <span>{t('AI-ஆல் இயக்கப்படும் இலவச தளம்', 'AI-Powered Free TNPSC Platform')}</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-4">
-              <span className="tamil text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-none">
+              <span className="text-red-600 block mb-3 font-semibold text-3xl sm:text-4xl tamil">
                 {t('வணக்கம்!', 'Welcome!')}
               </span>
-              <br />
-              <span className="text-gray-300 text-2xl sm:text-3xl font-medium">
-                {t('TNPSC தேர்வு வெற்றி பெற', 'Crack TNPSC exams')}
-              </span>
-              <br />
-              <span className="text-gray-400 text-xl sm:text-2xl font-medium">
-                {t('ஆரம்பிக்கலாம் —', 'Start preparing for —')}
-              </span>
-              <br />
-              <span className="text-gradient-gold text-3xl sm:text-4xl font-bold font-mono">
+              <span className="text-gray-800">{t('TNPSC வெற்றிக்கு', 'Crack TNPSC')}</span>
+              <span className="text-red-600 block mt-2 h-16 font-mono">
                 {typewriter}
-                <span className="animate-pulse text-brand-primary">|</span>
+                <span className="animate-pulse font-normal">|</span>
               </span>
             </h1>
 
-            <p className="text-gray-400 text-base sm:text-lg max-w-lg mb-8 leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
               {t(
-                'AI ஆசிரியர், மாக் தேர்வுகள், நடப்பு நிகழ்வுகள், முந்தைய வினாக்கள் — எல்லாம் முற்றிலும் இலவசம். தமிழில் கற்கலாம்.',
-                'AI Tutor, Mock Tests, Current Affairs, Previous Year Questions — everything completely free. Learn in Tamil.'
+                'AI ஆசிரியர், மாக் தேர்வுகள், நடப்பு நிகழ்வுகள், முந்தைய வினாக்கள் — எல்லாம் முற்றிலும் இலவசம்.',
+                'AI Tutor, Mock Tests, Current Affairs, Previous Year Questions — everything completely free.'
               )}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              {/* Language Switcher */}
-              <div className="flex items-center bg-navy-800 rounded-xl p-1 border border-white/10">
-                <button
-                  onClick={() => setLanguage('TAMIL')}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${language === 'TAMIL'
-                      ? 'bg-brand-primary text-navy-950 shadow-lg'
-                      : 'text-gray-400 hover:text-white'
-                    }`}
-                >
-                  தமிழ்
-                </button>
-                <button
-                  onClick={() => setLanguage('ENGLISH')}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${language === 'ENGLISH'
-                      ? 'bg-brand-primary text-navy-950 shadow-lg'
-                      : 'text-gray-400 hover:text-white'
-                    }`}
-                >
-                  English
-                </button>
-              </div>
-              <Link to="/ai-tutor" className="btn-primary flex items-center justify-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                {t('AI ஆசிரியரை இலவசமாக முயற்சிக்கவும்', 'Try AI Tutor Free')}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <Link to="/ai-tutor" className="btn-primary w-full sm:w-auto text-base py-3 px-8 shadow-sm">
+                <Play className="w-4 h-4 fill-current" />
+                {t('AI ஆசிரியரை முயற்சி', 'Try AI Tutor Free')}
               </Link>
-              <Link to="/exams" className="btn-secondary flex items-center justify-center gap-2">
+              <Link to="/exams" className="btn-secondary w-full sm:w-auto text-base py-3 px-8">
+                <BookOpen className="w-4 h-4" />
                 {t('தேர்வுகளைப் பார்', 'Explore Exams')}
-                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
-            {/* Live Stats */}
-            <div className="flex items-center gap-6 text-sm">
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                <span className="text-gray-400">
-                  <span className="text-white font-semibold">{formatNumber(liveUsers)}</span> {t('மாணவர்கள் இப்போது', 'studying now')}
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
                 </span>
+                <span><strong className="text-gray-800 dark:text-white">{formatNumber(liveUsers)}</strong> {t('மாணவர்கள் இப்போது', 'studying now')}</span>
               </div>
+              <div className="h-4 w-px bg-gray-200 hidden sm:block" />
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-brand-secondary" />
-                <span className="text-gray-400">
-                  <span className="text-white font-semibold">{formatNumber(testsToday)}</span> {t('தேர்வுகள் இன்று', 'tests today')}
-                </span>
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                <span><strong className="text-gray-800 dark:text-white">{formatNumber(testsToday)}</strong> {t('தேர்வுகள் இன்று', 'tests today')}</span>
               </div>
             </div>
-            {/* Mobile Stats Card */}
-            <div className="grid grid-cols-4 gap-2 mt-6 lg:hidden">
-              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
-                <Flame className="w-5 h-5 text-brand-primary mb-1 mx-auto" />
-                <p className="text-lg font-bold text-white">7</p>
-                <p className="text-[10px] text-gray-400">{t('தொடர்ச்சி', 'Streak')}</p>
-              </div>
-              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
-                <Trophy className="w-5 h-5 text-brand-secondary mb-1 mx-auto" />
-                <p className="text-lg font-bold text-white">#42</p>
-                <p className="text-[10px] text-gray-400">{t('தரவரிசை', 'Rank')}</p>
-              </div>
-              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
-                <Star className="w-5 h-5 text-success mb-1 mx-auto" />
-                <p className="text-lg font-bold text-white">87%</p>
-                <p className="text-[10px] text-gray-400">{t('துல்லியம்', 'Accuracy')}</p>
-              </div>
-              <div className="bg-[#111827] rounded-xl p-3 border border-white/5 text-center">
-                <Brain className="w-5 h-5 text-brand-accent mb-1 mx-auto" />
-                <p className="text-lg font-bold text-white">2,340</p>
-                <p className="text-[10px] text-gray-400">XP</p>
-              </div>
-            </div>
-          </motion.div>
+          </div>
 
-          {/* Right - Visual */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden lg:block"
-          >
-            <div className="relative">
-              {/* Stats Card */}
-              <div className="bg-glass rounded-2xl p-6 ring-glow-gold">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#111827] rounded-xl p-4 border border-white/5">
-                    <Flame className="w-6 h-6 text-brand-primary mb-2" />
-                    <p className="text-2xl font-bold text-white">7</p>
-                    <p className="text-xs text-gray-400">{t('நாள் தொடர்ச்சி', 'Day Streak')}</p>
-                  </div>
-                  <div className="bg-[#111827] rounded-xl p-4 border border-white/5">
-                    <Trophy className="w-6 h-6 text-brand-secondary mb-2" />
-                    <p className="text-2xl font-bold text-white">#42</p>
-                    <p className="text-xs text-gray-400">{t('தரவரிசை', 'Rank')}</p>
-                  </div>
-                  <div className="bg-[#111827] rounded-xl p-4 border border-white/5">
-                    <Star className="w-6 h-6 text-success mb-2" />
-                    <p className="text-2xl font-bold text-white">87%</p>
-                    <p className="text-xs text-gray-400">{t('துல்லியம்', 'Accuracy')}</p>
-                  </div>
-                  <div className="bg-[#111827] rounded-xl p-4 border border-white/5">
-                    <Brain className="w-6 h-6 text-brand-accent mb-2" />
-                    <p className="text-2xl font-bold text-white">2,340</p>
-                    <p className="text-xs text-gray-400">XP</p>
-                  </div>
+          {/* Right - Stats Card */}
+          <div className="lg:col-span-5 relative flex justify-center">
+            {!isAuthenticated && (
+              <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm rounded-2xl">
+                <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">{t('Login to see your progress', 'Login to see your progress')}</p>
+                <Link to="/auth/login" className="btn-primary text-sm py-2 px-5">{t('Login', 'Login')}</Link>
+              </div>
+            )}
+            <div className="relative w-full max-w-md">
+              <div className="absolute -top-4 -left-4 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-3.5 shadow-md flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
+                  <Flame className="w-5 h-5 fill-current" />
                 </div>
-
-                {/* Mini progress */}
-                <div className="mt-4 bg-[#111827] rounded-xl p-4 border border-white/5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-400">{t('இன்றைய இலக்கு', "Today's Goal")}</span>
-                    <span className="text-xs text-brand-primary font-medium">3/5 {t('பாடங்கள்', 'lessons')}</span>
-                  </div>
-                  <div className="w-full h-2 bg-navy-800 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: '60%' }}
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className="h-full bg-gradient-to-r from-brand-primary to-amber-400 rounded-full"
-                    />
-                  </div>
+                <div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{t('தொடர்ச்சி', 'Day Streak')}</p>
+                  <p className="text-sm font-extrabold text-gray-800 dark:text-white">7 {t('நாட்கள்', 'Days')} 🔥</p>
                 </div>
               </div>
 
-              {/* Floating elements */}
-              <motion.div
-                animate={{ y: [-5, 5, -5] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -top-4 -right-4 bg-glass rounded-lg px-3 py-2 border border-brand-primary/20"
-              >
-                <span className="text-xs text-brand-primary font-medium">+50 XP 🎯</span>
-              </motion.div>
-              <motion.div
-                animate={{ y: [5, -5, 5] }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute -bottom-3 -left-3 bg-glass rounded-lg px-3 py-2 border border-brand-secondary/20"
-              >
-                <span className="text-xs text-brand-secondary font-medium">{t('7 நாள் தொடர்ச்சி!', '7-day streak! 🔥')}</span>
-              </motion.div>
+              <div className="absolute -bottom-2 -right-4 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-3.5 shadow-md flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-red-600">
+                  <Award className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{t('தரம்', 'State Rank')}</p>
+                  <p className="text-sm font-extrabold text-gray-800 dark:text-white">#42 (Group 4)</p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-md">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <div className="w-3 h-3 rounded-full bg-blue-500" />
+                    <div className="w-3 h-3 rounded-full bg-gray-300" />
+                  </div>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                    ARIVU Profiler
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-1.5 text-blue-600 mb-1">
+                      <Target className="w-4 h-4" />
+                      <span className="text-xs font-bold text-gray-400 uppercase">{t('துல்லியம்', 'Accuracy')}</span>
+                    </div>
+                    <p className="text-2xl font-black text-gray-800 dark:text-white">87%</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
+                      <Zap className="w-4 h-4 fill-current" />
+                      <span className="text-xs font-bold text-gray-400 uppercase">XP</span>
+                    </div>
+                    <p className="text-2xl font-black text-gray-800 dark:text-white">2,340</p>
+                  </div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="font-bold text-gray-500 uppercase">{t('இன்றைய இலக்கு', "Today's Goal")}</span>
+                    <span className="text-red-600 font-extrabold">3/5 {t('பாடங்கள்', 'lessons')}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '60%' }} transition={{ duration: 1.5, delay: 0.5 }}
+                      className="h-full bg-red-600 rounded-full" />
+                  </div>
+                </div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
@@ -267,93 +190,67 @@ function HeroSection() {
 function NotificationTicker() {
   const t = useT();
   const notifications = MOCK_NOTIFICATIONS;
-
   return (
-    <section className="border-y border-white/5 bg-[#070B14]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center gap-3 py-3 overflow-hidden">
-          <div className="flex items-center gap-2 shrink-0">
-            <Bell className="w-4 h-4 text-brand-primary animate-pulse" />
-            <span className="text-xs font-semibold text-brand-primary uppercase tracking-wider">
-              {t('TNPSC அறிவிப்புகள்', 'TNPSC Alerts')}
-            </span>
-          </div>
-          <div className="flex-1 overflow-hidden relative">
-            <div className="flex gap-8 animate-scroll-left whitespace-nowrap">
-              {[...notifications, ...notifications].map((n, i) => (
-                <Link
-                  key={`${n.id}-${i}`}
-                  to={`/notifications/${n.id}`}
-                  className={`inline-flex items-center gap-2 text-sm transition-colors ${n.isUrgent ? 'text-red-400 font-medium' : 'text-gray-400 hover:text-white'
-                    }`}
-                >
-                  {n.isUrgent && <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />}
-                  {t(n.titleTamil, n.title)}
-                  <ChevronRight className="w-3 h-3" />
-                </Link>
-              ))}
-            </div>
+    <div className="bg-gray-50 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-800 py-3.5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-4 overflow-hidden">
+        <div className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-lg border border-red-100 text-xs font-extrabold uppercase tracking-widest whitespace-nowrap shrink-0">
+          <Bell className="w-3.5 h-3.5 animate-bounce" />
+          <span>{t('TNPSC அறிவிப்புகள்', 'TNPSC ALERTS')}</span>
+        </div>
+        <div className="flex-1 overflow-hidden relative">
+          <div className="flex gap-8 animate-scroll-left whitespace-nowrap">
+            {[...notifications, ...notifications].map((n, i) => (
+              <Link key={`${n.id}-${i}`} to={`/notifications/${n.id}`}
+                className={`inline-flex items-center gap-2 text-sm font-medium transition-colors ${n.isUrgent ? 'text-red-600' : 'text-gray-600 dark:text-gray-300 hover:text-red-600'}`}>
+                {n.isUrgent && <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />}
+                {t(n.titleTamil, n.title)}
+                <ChevronRight className="w-3 h-3" />
+              </Link>
+            ))}
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
 function ExamCards() {
   const t = useT();
   const navigate = useNavigate();
-
   return (
-    <section className="py-16">
+    <section className="bg-white dark:bg-gray-950 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">
             {t('தேர்வைத் தேர்வு செய்க', 'Choose Your Exam')}
           </h2>
-          <p className="text-gray-400 text-sm">
+          <p className="mt-2 text-gray-500 dark:text-gray-400 font-medium">
             {t('உங்கள் இலக்கு தேர்வுக்கான முழு தயாரிப்பு பொருட்களைப் பெறுங்கள்', 'Get complete preparation materials for your target exam')}
           </p>
         </div>
-
-        <motion.div
-          variants={stagger.container}
-          initial="initial"
-          animate="animate"
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {EXAM_GROUPS.map((exam) => {
             const IconComp = ICON_MAP[exam.icon] || FileText;
             return (
-              <motion.div
-                key={exam.slug}
-                variants={stagger.item}
-                onClick={() => navigate(`/exams/${exam.slug.toLowerCase()}`)}
-                className="group cursor-pointer"
-              >
-                <div className="card-glow relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: `radial-gradient(circle at 50% 50%, ${exam.color}15, transparent 70%)` }}
-                  />
-                  <div className="relative p-5">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
-                      style={{ background: `${exam.color}15`, border: `1px solid ${exam.color}30` }}
-                    >
-                      <IconComp className="w-6 h-6" style={{ color: exam.color }} />
-                    </div>
-                    <h3 className="text-base font-semibold text-white mb-0.5">{exam.name}</h3>
-                    <p className="tamil text-xs text-gray-500 mb-3">{exam.nameTamil}</p>
-                    <div className="flex items-center gap-1 text-xs" style={{ color: exam.color }}>
-                      <span>{t('தொடங்கு', 'Start')}</span>
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                    </div>
+              <div key={exam.slug} onClick={() => navigate(`/exams/${exam.slug.toLowerCase()}`)}
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md hover:border-red-200 dark:hover:border-red-800 p-5 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
+                    style={{ background: `${exam.color}15`, border: `1px solid ${exam.color}30` }}>
+                    <IconComp className="w-6 h-6" style={{ color: exam.color }} />
                   </div>
+                  <h3 className="text-base font-extrabold text-gray-800 dark:text-white mb-0.5">{exam.name}</h3>
+                  <p className="tamil text-xs text-gray-400 mb-3">{exam.nameTamil}</p>
                 </div>
-              </motion.div>
+                <button className="w-full py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all duration-200"
+                  style={{ background: `${exam.color}15`, color: exam.color }}>
+                  {t('தொடங்கு', 'Start')}
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -367,8 +264,8 @@ function DailyQuiz() {
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
+
   const questions = useMemo(() => {
-    // Seeded PRNG (mulberry32)
     const mulberry32 = (seed: number) => {
       return () => {
         seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
@@ -377,27 +274,13 @@ function DailyQuiz() {
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     };
-
-    // Date seed (changes daily, e.g. 20260614)
     const today = new Date();
     const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-
-    // Per-browser user seed (persisted)
     let userSeed = Number(localStorage.getItem('arivu_quiz_seed'));
-    if (!userSeed) {
-      userSeed = Math.floor(Math.random() * 1000000);
-      localStorage.setItem('arivu_quiz_seed', String(userSeed));
-    }
-
+    if (!userSeed) { userSeed = Math.floor(Math.random() * 1000000); localStorage.setItem('arivu_quiz_seed', String(userSeed)); }
     const rand = mulberry32(dateSeed + userSeed);
-
-    // Fisher-Yates shuffle using seeded rand
     const pool = [...MOCK_QUESTIONS];
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     return pool.slice(0, Math.min(10, pool.length));
   }, []);
 
@@ -410,42 +293,20 @@ function DailyQuiz() {
   };
 
   const handleNext = () => {
-    if (currentQ < questions.length - 1) {
-      setCurrentQ(q => q + 1);
-      setSelected(null);
-      setShowResult(false);
-    } else {
-      setCompleted(true);
-    }
+    if (currentQ < questions.length - 1) { setCurrentQ(q => q + 1); setSelected(null); setShowResult(false); }
+    else setCompleted(true);
   };
 
   const q = questions[currentQ];
 
   if (completed) {
     return (
-      <section className="py-16 bg-gradient-to-b from-transparent via-brand-primary/5 to-transparent">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}>
-            <Trophy className="w-16 h-16 text-brand-primary mx-auto mb-4" />
-          </motion.div>
-          <h3 className="text-2xl font-bold text-white mb-2">
-            {t('அன்றாட வினா முடிந்தது!', 'Daily Quiz Complete!')}
-          </h3>
-          <p className="text-lg text-gray-300 mb-4">
-            {t(`${score}/5 சரியான பதில்கள்`, `${score}/5 correct answers`)}
-          </p>
-          <div className="w-32 h-32 mx-auto mb-6 relative">
-            <svg className="w-32 h-32 -rotate-90">
-              <circle cx="64" cy="64" r="56" fill="none" stroke="#1F2937" strokeWidth="8" />
-              <circle cx="64" cy="64" r="56" fill="none" stroke="#F59E0B" strokeWidth="8"
-                strokeDasharray={`${(score / 5) * 351.86} 351.86`}
-                strokeLinecap="round" />
-            </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-brand-primary">
-              {Math.round(score / 5 * 100)}%
-            </span>
-          </div>
-          <Link to="/tests" className="btn-primary inline-flex items-center gap-2">
+      <section className="bg-gray-50 dark:bg-gray-900 py-16 border-t border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <Trophy className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white dark:text-white mb-2">{t('அன்றாட வினா முடிந்தது!', 'Daily Quiz Complete!')}</h3>
+          <p className="text-lg text-gray-600 mb-6">{score}/{questions.length} {t('சரியான பதில்கள்', 'correct answers')}</p>
+          <Link to="/tests" className="btn-primary inline-flex">
             {t('மேலும் தேர்வுகள்', 'More Tests')} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -454,87 +315,76 @@ function DailyQuiz() {
   }
 
   return (
-    <section className="py-16 bg-gradient-to-b from-transparent via-brand-secondary/5 to-transparent">
+    <section className="bg-gray-50 dark:bg-gray-900 py-16 border-t border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-secondary/10 border border-brand-secondary/20 mb-4">
-            <Zap className="w-4 h-4 text-brand-secondary" />
-            <span className="text-xs font-medium text-brand-secondary">{t('அன்றாட வினா', 'Daily Quiz')}</span>
-          </div>
-          <h2 className="text-2xl font-bold text-white">{t('இன்றைய 5 வினாக்கள்', "Today's 5 Questions")}</h2>
-          <p className="text-gray-400 text-sm mt-1">{t('இலவசமாக முயற்சிக்கலாம்', 'Try for free — no signup needed')}</p>
+          <span className="badge-cyan mb-3">{t('அன்றாட வினா', 'Daily Quiz')}</span>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">{t('இன்றைய வினாக்கள்', "Today's Questions")}</h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">{t('இலவசமாக முயற்சிக்கலாம்', 'Try for free — no signup needed')}</p>
         </div>
 
-        <div className="card-glow">
-          {/* Progress */}
-          <div className="flex items-center gap-2 mb-4">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md p-6 sm:p-8">
+          <div className="flex items-center gap-2 mb-6">
             {questions.map((_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < currentQ ? 'bg-brand-primary' : i === currentQ ? 'bg-brand-primary/50' : 'bg-white/10'
-                }`} />
+              <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i < currentQ ? 'bg-red-500' : i === currentQ ? 'bg-red-300' : 'bg-gray-200'}`} />
             ))}
           </div>
 
-          {/* Question */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="badge-gold">{t(q.isPYQ ? 'PYQ' : 'பயிற்சி', q.isPYQ ? 'PYQ' : 'Practice')}</span>
-              {q.year && <span className="badge-cyan">{q.year}</span>}
+          <div className="flex items-center justify-between gap-4 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
+            <span className="text-xs font-extrabold text-red-600 bg-red-50 px-3 py-1 rounded-lg">
+              {t(q.isPYQ ? 'PYQ' : 'பயிற்சி', q.isPYQ ? 'PYQ' : 'Practice')}
+            </span>
+            <div className="flex items-center gap-3 text-xs text-gray-400 font-semibold">
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> 60s</span>
+              <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> +10 XP</span>
             </div>
-            <h3 className="text-lg font-medium text-white leading-relaxed mb-1">
-              <span className="tamil">{q.contentTamil}</span>
-            </h3>
-            {language === 'ENGLISH' && q.contentEnglish && (
-              <p className="text-sm text-gray-400 mt-1">{q.contentEnglish}</p>
-            )}
           </div>
 
-          {/* Options */}
-          <div className="grid gap-3 mb-6">
+          <h3 className="text-lg font-extrabold text-gray-800 dark:text-white leading-snug mb-6 tamil">{q.contentTamil}</h3>
+          {language === 'ENGLISH' && q.contentEnglish && <p className="text-sm text-gray-500 mb-4">{q.contentEnglish}</p>}
+
+          <div className="space-y-3 mb-6">
             {q.options.map((opt) => {
               const isSelected = selected === opt.id;
               const isCorrect = opt.isCorrect;
-              let cls = 'bg-[#111827] border border-white/10 hover:border-white/20';
+              let cls = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:border-red-300 hover:bg-red-50/30 text-gray-700 dark:text-gray-200';
               if (showResult) {
-                if (isCorrect) cls = 'bg-success/10 border border-success/40';
-                else if (isSelected && !isCorrect) cls = 'bg-error/10 border border-error/40';
-              } else if (isSelected) {
-                cls = 'bg-brand-primary/10 border border-brand-primary/40';
-              }
+                if (isCorrect) cls = 'bg-green-50 border-green-400 text-green-800 font-bold';
+                else if (isSelected && !isCorrect) cls = 'bg-red-50 border-red-300 text-red-800 font-bold';
+                else cls = 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-400 opacity-70';
+              } else if (isSelected) cls = 'bg-red-50 border-red-400 text-red-800 font-bold';
               return (
-                <button
-                  key={opt.id}
-                  onClick={() => handleSelect(opt.id)}
-                  disabled={showResult}
-                  className={`${cls} rounded-xl px-4 py-3 text-left transition-all flex items-center gap-3 disabled:cursor-default`}
-                >
-                  <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center text-xs font-medium text-gray-400 shrink-0">
-                    {opt.id.toUpperCase()}
-                  </span>
-                  <span className="text-sm text-white tamil">{opt.textTamil}</span>
-                  {language === 'ENGLISH' && opt.textEnglish && (
-                    <span className="text-xs text-gray-500 ml-2">{opt.textEnglish}</span>
-                  )}
-                  {showResult && isCorrect && <Star className="w-4 h-4 text-success ml-auto" />}
-                  {showResult && isSelected && !isCorrect && <XIcon className="w-4 h-4 text-error ml-auto" />}
+                <button key={opt.id} onClick={() => handleSelect(opt.id)} disabled={!!showResult}
+                  className={`${cls} w-full rounded-xl px-4 py-3 text-left transition-all flex items-center justify-between text-sm`}>
+                  <div className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-xs font-bold shrink-0">
+                      {opt.id.toUpperCase()}
+                    </span>
+                    <span className="tamil">{opt.textTamil}</span>
+                  </div>
+                  {showResult && isCorrect && <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded">✓</span>}
+                  {showResult && isSelected && !isCorrect && <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">✗</span>}
                 </button>
               );
             })}
           </div>
 
-          {/* Explanation */}
           {showResult && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-              className="bg-[#111827] border border-white/5 rounded-xl p-4 mb-4">
-              <p className="text-xs font-semibold text-brand-secondary mb-1">{t('விளக்கம்', 'Explanation')}</p>
-              <p className="text-sm text-gray-300 tamil">
-                {language === 'TAMIL' ? (q.explanationTamil || q.explanation) : (q.explanation || q.explanationTamil)}
-              </p>
-            </motion.div>
+            <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <HelpCircle className={`w-4 h-4 mt-0.5 ${selected && q.options.find(o=>o.id===selected)?.isCorrect ? 'text-green-600' : 'text-red-500'}`} />
+                <div>
+                  <h4 className="text-sm font-extrabold text-gray-800 dark:text-white mb-1">{t('விளக்கம்', 'Explanation')}</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed tamil">
+                    {language === 'TAMIL' ? (q.explanationTamil || q.explanation) : (q.explanation || q.explanationTamil)}
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
 
-          {/* Next */}
           {showResult && (
-            <button onClick={handleNext} className="btn-primary w-full flex items-center justify-center gap-2">
+            <button onClick={handleNext} className="btn-primary w-full">
               {currentQ < questions.length - 1 ? t('அடுத்த வினா', 'Next Question') : t('முடிக்க', 'Finish')}
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -545,56 +395,44 @@ function DailyQuiz() {
   );
 }
 
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
 function CurrentAffairsPreview() {
   const t = useT();
   const { language } = useAppStore();
-
   return (
-    <section className="py-16">
+    <section className="bg-white dark:bg-gray-950 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-end justify-between gap-6 mb-10">
           <div>
-            <h2 className="text-2xl font-bold text-white">{t('நடப்பு நிகழ்வுகள்', 'Current Affairs')}</h2>
-            <p className="text-sm text-gray-400 mt-1">{t('இன்றைய முக்கிய செய்திகள்', "Today's top stories")}</p>
+            <span className="badge-cyan mb-2">{t('தகவல் களஞ்சியம்', 'Daily Updates')}</span>
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight mt-2">
+              {t('நடப்பு நிகழ்வுகள்', 'Current Affairs')}
+            </h2>
           </div>
-          <Link to="/current-affairs" className="btn-ghost flex items-center gap-1 text-sm">
-            {t('அனைத்தையும் பார்', 'View All')} <ChevronRight className="w-4 h-4" />
+          <Link to="/current-affairs" className="text-red-600 hover:text-red-700 font-extrabold text-sm flex items-center gap-1 group whitespace-nowrap">
+            {t('அனைத்தையும் பார்', 'View All')}
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {MOCK_CURRENT_AFFAIRS.slice(0, 3).map((ca, i) => (
-            <motion.div
-              key={ca.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="card hover:border-brand-secondary/30 group cursor-pointer"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <span className="badge-cyan">{ca.category}</span>
+            <motion.div key={ca.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">{ca.category}</span>
+                <h3 className="font-extrabold text-gray-800 dark:text-white mt-3 text-base leading-snug line-clamp-2 tamil">
+                  {language === 'TAMIL' ? ca.titleTamil : ca.title}
+                </h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 leading-relaxed line-clamp-3">
+                  {language === 'TAMIL' ? ca.summaryTamil : ca.summary}
+                </p>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, j) => (
-                    <Star key={j} className={`w-3 h-3 ${j < ca.importanceLevel ? 'text-brand-primary fill-brand-primary' : 'text-gray-700'}`} />
+                    <Star key={j} className={`w-3 h-3 ${j < ca.importanceLevel ? 'text-red-500 fill-red-500' : 'text-gray-200'}`} />
                   ))}
                 </div>
-              </div>
-              <h3 className="text-sm font-medium text-white mb-2 group-hover:text-brand-secondary transition-colors tamil">
-                {language === 'TAMIL' ? ca.titleTamil : ca.title}
-              </h3>
-              <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
-                {language === 'TAMIL' ? ca.summaryTamil : ca.summary}
-              </p>
-              <div className="flex items-center gap-1 mt-3 text-xs text-brand-secondary opacity-0 group-hover:opacity-100 transition-opacity">
-                {t('மேலும் படி', 'Read more')} <ArrowRight className="w-3 h-3" />
+                <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </motion.div>
           ))}
@@ -606,54 +444,40 @@ function CurrentAffairsPreview() {
 
 function LeaderboardPreview() {
   const t = useT();
-
   return (
-    <section className="py-16 bg-gradient-to-b from-transparent via-brand-primary/3 to-transparent">
+    <section className="bg-gray-50 dark:bg-gray-900 py-16 border-t border-gray-100 dark:border-gray-700 dark:border-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-white">{t('தரவரிசை', 'Leaderboard')}</h2>
-            <p className="text-sm text-gray-400 mt-1">{t('இந்த வாரத்தின் சிறந்த மாணவர்கள்', 'This week\'s top performers')}</p>
-          </div>
-          <Link to="/leaderboard" className="btn-ghost flex items-center gap-1 text-sm">
-            {t('முழு பட்டியல்', 'Full Board')} <ChevronRight className="w-4 h-4" />
-          </Link>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">{t('தரவரிசை', 'Leaderboard')}</h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">{t('இந்த வாரத்தின் சிறந்த மாணவர்கள்', "This week's top performers")}</p>
         </div>
-
-        <div className="card overflow-hidden">
-          <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-4 gap-y-0 p-1">
-            {MOCK_LEADERBOARD.slice(0, 7).map((entry, i) => (
-              <motion.div
-                key={entry.userId}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className={`contents [&>*]:py-2.5 [&>*]:px-4 ${i < MOCK_LEADERBOARD.length - 1 ? '[&>*]:border-b [&>*]:border-white/5' : ''
-                  }`}
-              >
-                <div className="flex items-center">
-                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${entry.rank === 1 ? 'bg-brand-primary/20 text-brand-primary' :
-                      entry.rank === 2 ? 'bg-gray-400/20 text-gray-400' :
-                        entry.rank === 3 ? 'bg-amber-700/20 text-amber-600' :
-                          'bg-white/5 text-gray-500'
-                    }`}>
-                    {entry.rank}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-brand-secondary/30 to-brand-primary/30 rounded-full flex items-center justify-center text-xs font-medium text-white">
-                    {entry.name.charAt(0)}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
+          <div className="space-y-3">
+            {MOCK_LEADERBOARD.slice(0, 5).map((entry, i) => (
+              <div key={entry.userId} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                entry.rank === 1 ? 'bg-red-50 border-red-100' :
+                entry.rank === 2 ? 'bg-gray-50 border-gray-200' :
+                entry.rank === 3 ? 'bg-amber-50 border-amber-100' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
+              }`}>
+                <div className="flex items-center gap-4">
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-extrabold ${
+                    entry.rank === 1 ? 'bg-red-600 text-white' :
+                    entry.rank === 2 ? 'bg-gray-300 text-gray-700' :
+                    entry.rank === 3 ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-500'
+                  }`}>{entry.rank}</span>
+                  <div>
+                    <h4 className="font-extrabold text-gray-900 dark:text-white text-sm tamil">{entry.name}</h4>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{entry.accuracy}% {t('துல்லியம்', 'accuracy')}</p>
                   </div>
-                  <span className="text-sm font-medium text-white tamil">{entry.name}</span>
                 </div>
-                <div className="flex items-center text-sm text-brand-primary font-mono font-semibold">
-                  {entry.score.toFixed(1)}
-                </div>
-                <div className="flex items-center text-xs text-gray-500">
-                  {entry.accuracy}% {t('துல்லியம்', 'acc')}
-                </div>
-              </motion.div>
+                <span className="text-sm font-extrabold text-gray-800 dark:text-white">{entry.score.toFixed(1)} XP</span>
+              </div>
             ))}
+          </div>
+          <div className="mt-4 text-center">
+            <Link to="/leaderboard" className="text-red-600 hover:text-red-700 font-extrabold text-sm flex items-center justify-center gap-1">
+              {t('முழு பட்டியல்', 'Full Leaderboard')} <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </div>
@@ -671,47 +495,38 @@ function FeaturesComparison() {
     { name: t('தகவமைப்பு தேர்வு', 'Adaptive Testing'), arivu: true, testbook: false, winmeen: false },
     { name: t('இலவசம்', 'Free Forever'), arivu: true, testbook: false, winmeen: false },
   ];
-
   return (
-    <section className="py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+    <section className="bg-white dark:bg-gray-950 py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {t('ஏன் ARIVU AI?', 'Why ARIVU AI?')}
-          </h2>
-          <p className="text-gray-400 text-sm">{t('ஒப்பீடு பாருங்கள்', 'See the comparison')}</p>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">{t('ஏன் ARIVU AI?', 'Why ARIVU AI?')}</h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">{t('ஒப்பீடு பாருங்கள்', 'See the comparison')}</p>
         </div>
-
-        <div className="card overflow-hidden">
-          <div className="grid grid-cols-4 gap-0">
-            {/* Header */}
-            <div className="p-3 border-b border-white/10" />
-            <div className="p-3 border-b border-brand-primary/30 text-center">
-              <span className="text-sm font-bold text-brand-primary">ARIVU</span>
-            </div>
-            <div className="p-3 border-b border-white/10 text-center">
-              <span className="text-sm font-medium text-gray-500">Testbook</span>
-            </div>
-            <div className="p-3 border-b border-white/10 text-center">
-              <span className="text-sm font-medium text-gray-500">Winmeen</span>
-            </div>
-
-            {/* Rows */}
-            {features.map((f) => (
-              <Fragment key={f.name}>
-                <div className="p-3 border-t border-white/5 text-sm text-gray-300">{f.name}</div>
-                <div className="p-3 border-t border-brand-primary/20 text-center">
-                  {f.arivu ? <span className="text-success text-lg">✓</span> : <span className="text-gray-600">—</span>}
-                </div>
-                <div className="p-3 border-t border-white/5 text-center">
-                  {f.testbook ? <span className="text-success text-lg">✓</span> : <span className="text-error text-lg">✗</span>}
-                </div>
-                <div className="p-3 border-t border-white/5 text-center">
-                  {f.winmeen ? <span className="text-success text-lg">✓</span> : <span className="text-error text-lg">✗</span>}
-                </div>
-              </Fragment>
-            ))}
-          </div>
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+          <table className="w-full text-left border-collapse bg-white">
+            <thead>
+              <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <th className="p-4 text-sm font-bold text-gray-600 dark:text-gray-300">{t('வசதிகள்', 'Features')}</th>
+                <th className="p-4 text-sm font-extrabold text-red-600 bg-red-50 border-x border-red-100">ARIVU AI</th>
+                <th className="p-4 text-sm font-bold text-gray-400 dark:text-gray-500">Testbook</th>
+                <th className="p-4 text-sm font-bold text-gray-400 dark:text-gray-500">Winmeen</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {features.map((f) => (
+                <Fragment key={f.name}>
+                  <tr>
+                    <td className="p-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{f.name}</td>
+                    <td className="p-4 text-sm font-extrabold bg-red-50/30 dark:bg-red-950/30 border-x border-red-100 dark:border-red-900 text-center">
+                      {f.arivu ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="p-4 text-center">{f.testbook ? <span className="text-green-600">✓</span> : <span className="text-red-400">✗</span>}</td>
+                    <td className="p-4 text-center">{f.winmeen ? <span className="text-green-600">✓</span> : <span className="text-red-400">✗</span>}</td>
+                  </tr>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </section>

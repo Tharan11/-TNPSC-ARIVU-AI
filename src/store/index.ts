@@ -11,6 +11,9 @@ interface AppState {
   isAuthenticated: boolean;
   setIsAuthenticated: (val: boolean) => void;
 
+  authChecked: boolean;
+  setAuthChecked: (val: boolean) => void;
+
   sidebarOpen: boolean;
   setSidebarOpen: (val: boolean) => void;
 
@@ -20,7 +23,7 @@ interface AppState {
   t: (ta: string, en: string) => string;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   language: 'TAMIL',
   setLanguage: (language) => set({ language }),
 
@@ -30,13 +33,16 @@ export const useAppStore = create<AppState>((set) => ({
   isAuthenticated: false,
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
 
+  authChecked: false,
+  setAuthChecked: (authChecked) => set({ authChecked }),
+
   sidebarOpen: false,
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
 
   selectedExam: null,
   setSelectedExam: (selectedExam) => set({ selectedExam }),
 
-  t: (ta, _en) => ta,
+  t: (ta, en) => (get().language === 'TAMIL' ? ta : en),
 }));
 
 export function useT() {

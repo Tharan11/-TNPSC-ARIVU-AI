@@ -21,9 +21,13 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Min 2 characters'),
   email: z.string().email('Invalid email'),
   phone: z.string().optional().or(z.literal('')),
-  password: z.string().min(6, 'Min 6 characters'),
+  password: z.string().min(8, 'Min 8 characters').regex(/[A-Z]/, 'Need 1 uppercase letter').regex(/[0-9]/, 'Need 1 number'),
+  confirmPassword: z.string(),
   targetExam: z.enum(['GROUP_1', 'GROUP_2', 'GROUP_2A', 'GROUP_4', 'VAO', 'ENGINEERING', 'FOREST', 'POLICE'] as const).optional(),
   preferredLang: z.enum(['TAMIL', 'ENGLISH']),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -74,6 +78,11 @@ export default function AuthPage() {
         options: { data: { name: data.name, phone: data.phone || null, target_exam: data.targetExam || null, preferred_lang: data.preferredLang } },
       });
       if (error) throw error;
+      if (!authData.session) {
+        setGlobalError(t('கணக்கு உருவாக்கப்பட்டது! மின்னஞ்சலைச் சரிபார்க்கவும்.', 'Account created! Please check your email to verify your account before logging in.'));
+        setTab('login');
+        return;
+      }
       setUser(createUser(authData.user!.id, data.email, data.name, data.preferredLang, data.targetExam as ExamGroup));
       setIsAuthenticated(true);
       setLanguage(data.preferredLang);
@@ -102,7 +111,7 @@ export default function AuthPage() {
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }} className="mb-8 flex justify-center">
             <Zap className="w-16 h-16 text-brand-primary drop-shadow-lg" />
           </motion.div>
-          <h1 className="text-4xl font-bold mb-2"><span className="text-gradient-gold">அறிவே வெற்றி</span></h1>
+          <h1 className="text-4xl font-bold mb-2"><span className="text-gradient-gold" lang="ta">அறிவே வெற்றி</span></h1>
           <p className="text-lg text-text-secondary mb-8">Knowledge is Victory</p>
           <div className="space-y-3 text-left text-sm">
             <div className="flex items-center gap-2">
@@ -138,6 +147,7 @@ export default function AuthPage() {
           <div className="flex gap-2 mb-8 bg-navy-900 rounded-lg p-1">
             <button
               onClick={() => { setTab('login'); setGlobalError(''); }}
+              aria-label={t('உள்நுழைய தாவு', 'Login tab')}
               className={`flex-1 py-2.5 rounded-md font-medium transition-all ${tab === 'login' ? 'bg-brand-primary text-navy-950' : 'text-text-secondary hover:text-text-primary'
                 }`}
             >
@@ -145,6 +155,7 @@ export default function AuthPage() {
             </button>
             <button
               onClick={() => { setTab('register'); setGlobalError(''); }}
+              aria-label={t('பதிவு தாவு', 'Register tab')}
               className={`flex-1 py-2.5 rounded-md font-medium transition-all ${tab === 'register' ? 'bg-brand-primary text-navy-950' : 'text-text-secondary hover:text-text-primary'
                 }`}
             >
@@ -187,12 +198,19 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={t('கடவுச்சொல்லைக் காட்டு', 'Toggle password visibility')}
                     className="absolute right-3 top-3 text-text-muted hover:text-text-primary"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {loginForm.formState.errors.password && <p className="text-error text-xs mt-1">{loginForm.formState.errors.password.message}</p>}
+              </div>
+
+              <div className="text-right text-sm">
+                <button type="button" onClick={() => navigate('/auth/reset')} className="text-brand-primary hover:text-brand-secondary font-medium">
+                  {t('கடவுச்சொல் மறந்துவிட்டதா?', 'Forgot password?')}
+                </button>
               </div>
 
               <button type="submit" disabled={isLoading} className="btn-primary w-full flex items-center justify-center gap-2">
@@ -245,12 +263,13 @@ export default function AuthPage() {
                   <input
                     {...registerForm.register('password')}
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={t('குறைந்தபட்சம் 6 எழுத்து', 'At least 6 characters')}
+                    placeholder={t('குறைந்தபட்சம் 8 எழுத்து', 'At least 8 characters')}
                     className="input-field pl-10 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={t('கடவுச்சொல்லைக் காட்டு', 'Toggle password visibility')}
                     className="absolute right-3 top-3 text-text-muted hover:text-text-primary"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -259,9 +278,23 @@ export default function AuthPage() {
                 {registerForm.formState.errors.password && <p className="text-error text-xs mt-1">{registerForm.formState.errors.password.message}</p>}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">{t('கடவுச்சொல்லை உறுதிப்படுத்தவும்', 'Confirm Password')}</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 w-5 h-5 text-text-muted" />
+                  <input
+                    {...registerForm.register('confirmPassword')}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={t('மீண்டும் உள்ளிடவும்', 'Re-enter password')}
+                    className="input-field pl-10"
+                  />
+                </div>
+                {registerForm.formState.errors.confirmPassword && <p className="text-error text-xs mt-1">{registerForm.formState.errors.confirmPassword.message}</p>}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-2">{t('இலக்கு பரীक்ષை', 'Target Exam')}</label>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">{t('இலக்கு பரீக்ஷை', 'Target Exam')}</label>
                   <select {...registerForm.register('targetExam')} className="input-field text-sm">
                     <option value="">{t('தேர்வு செய்யவும்', 'Select')}</option>
                     {EXAM_GROUPS.map((exam) => (

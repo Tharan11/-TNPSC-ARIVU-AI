@@ -1,12 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         brand: {
-          primary: '#F59E0B',
-          secondary: '#06B6D4',
+          primary: '#DC2626',
+          secondary: '#2563EB',
           accent: '#8B5CF6',
         },
         navy: {
@@ -34,11 +35,7 @@ export default {
       animation: {
         'fade-up': 'fadeUp 0.5s ease-out forwards',
         'fade-in': 'fadeIn 0.3s ease-out forwards',
-        'slide-left': 'slideLeft 0.3s ease-out forwards',
-        'pulse-gold': 'pulseGold 2s ease-in-out infinite',
         'scroll-left': 'scrollLeft 30s linear infinite',
-        'count-up': 'countUp 1s ease-out forwards',
-        'flip': 'flip 0.6s ease-in-out',
       },
       keyframes: {
         fadeUp: {
@@ -49,25 +46,9 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
-        slideLeft: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(0)' },
-        },
-        pulseGold: {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(245,158,11,0.4)' },
-          '50%': { boxShadow: '0 0 0 12px rgba(245,158,11,0)' },
-        },
         scrollLeft: {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' },
-        },
-        countUp: {
-          '0%': { opacity: '0', transform: 'scale(0.5)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-        flip: {
-          '0%': { transform: 'rotateY(0)' },
-          '100%': { transform: 'rotateY(180deg)' },
         },
       },
     },

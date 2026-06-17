@@ -1,11 +1,40 @@
+// Simple in-memory rate limiter (per Vercel function instance).
+// For production at scale, replace with Vercel KV / Upstash Redis.
+const requestLog = new Map();
+const WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS = 20; // anonymous users per hour per IP
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = requestLog.get(ip) || { count: 0, windowStart: now };
+
+  if (now - entry.windowStart > WINDOW_MS) {
+    entry.count = 0;
+    entry.windowStart = now;
+  }
+
+  entry.count += 1;
+  requestLog.set(ip, entry);
+
+  return entry.count > MAX_REQUESTS;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+  }
+
   const { message, lang } = req.body || {};
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
+  }
+  if (typeof message !== 'string' || message.length > 2000) {
+    return res.status(400).json({ error: 'Invalid message' });
   }
 
   const apiKey = process.env.GROQ_API_KEY;

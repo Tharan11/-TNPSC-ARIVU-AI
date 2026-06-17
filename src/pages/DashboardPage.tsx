@@ -86,7 +86,7 @@ function StatsRow() {
 
   const stats = [
     {
-      label: t('अध्ययन तार', 'Study Streak'),
+      label: t('படிப்பு தொடர்ச்சி', 'Study Streak'),
       value: `${user?.currentStreak || 7}/${user?.longestStreak || 12}`,
       icon: Flame,
       color: 'text-red-400',

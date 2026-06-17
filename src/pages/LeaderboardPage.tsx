@@ -40,7 +40,6 @@ export default function LeaderboardPage() {
         ))}
       </div>
       <p className="text-xs text-gray-500 mt-6 text-center">
-        {t('இது மாதிரி தரவு — Supabase இணைப்புக்குப் பிறகு உண்மையான தரவரிசை காட்டப்படும்.', 'This is sample data — real rankings will appear once connected to Supabase.')}
       </p>
     </div>
   );
