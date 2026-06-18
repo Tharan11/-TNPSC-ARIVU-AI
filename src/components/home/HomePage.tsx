@@ -20,6 +20,7 @@ function HeroSection() {
   const t = useT();
   const navigate = useNavigate();
   const { language, isAuthenticated } = useAppStore();
+  const userStats = { accuracy: 87, xp: 4250 };
   const [typewriter, setTypewriter] = useState('');
   const phrases = ['Group 1', 'Group 2', 'Group 2A', 'Group 4', 'VAO', 'Engineering Services'];
   const phraseRef = useRef(0);
@@ -158,14 +159,14 @@ function HeroSection() {
                       <Target className="w-4 h-4" />
                       <span className="text-xs font-bold text-gray-400 uppercase">{t('துல்லியம்', 'Accuracy')}</span>
                     </div>
-                    <p className="text-2xl font-black text-gray-800 dark:text-white">87%</p>
+                    <p className="text-2xl font-black text-gray-800 dark:text-white">{isAuthenticated ? userStats.accuracy + "%" : "—"}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
                       <Zap className="w-4 h-4 fill-current" />
                       <span className="text-xs font-bold text-gray-400 uppercase">XP</span>
                     </div>
-                    <p className="text-2xl font-black text-gray-800 dark:text-white">2,340</p>
+                    <p className="text-2xl font-black text-gray-800 dark:text-white">{isAuthenticated ? userStats.xp.toLocaleString() : "—"}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
