@@ -97,13 +97,9 @@ export default function AITutorPage() {
           <span className="text-sm">{t('புதிய சாட்', 'New Chat')}</span>
         </button>
         <div className="flex-1 overflow-y-auto space-y-2 px-4">
-          {mockConversations.map(conv => (
-            <motion.button key={conv.id} whileHover={{ x: 4 }}
-              className={`w-full text-left p-3 rounded-lg transition-all ${conv.isActive ? 'bg-brand-primary/20 border border-brand-primary/40' : 'bg-navy-800 border border-navy-700'}`}>
-              <p className="text-sm font-medium text-white truncate">{conv.title}</p>
-              <p className="text-xs text-gray-400 mt-1">{conv.date}</p>
-            </motion.button>
-          ))}
+          <div className="text-center py-8 text-gray-500">
+            <p className="text-xs">{t('உரையாடல் வரலாறு விரைவில்', 'Chat history coming soon')}</p>
+          </div>
         </div>
       </div>
 
@@ -147,12 +143,28 @@ export default function AITutorPage() {
           />
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
-              <button className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg border border-navy-700">
+              <button
+                title="Voice input"
+                onClick={() => {
+                  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                  if (!SpeechRecognition) { alert('உங்கள் browser voice input support செய்யவில்லை'); return; }
+                  const recognition = new SpeechRecognition();
+                  recognition.lang = lang === 'TAMIL' ? 'ta-IN' : 'en-IN';
+                  recognition.interimResults = false;
+                  recognition.onresult = (e: any) => setInput(prev => prev + e.results[0][0].transcript);
+                  recognition.start();
+                }}
+                className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg border border-navy-700 transition-colors">
                 <Mic className="w-5 h-5 text-brand-secondary" />
               </button>
-              <button className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg border border-navy-700">
+              <label className="p-2.5 bg-navy-800 hover:bg-navy-700 rounded-lg border border-navy-700 transition-colors cursor-pointer" title="Attach image">
                 <Paperclip className="w-5 h-5 text-brand-secondary" />
-              </button>
+                <input type="file" accept="image/*,.pdf,.txt" className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setInput(prev => prev + (prev ? '\n' : '') + '[File: ' + file.name + ']');
+                  }} />
+              </label>
             </div>
             <button onClick={handleSend} disabled={!input.trim() || isTyping}
               className="btn-primary p-2.5 disabled:opacity-50 disabled:cursor-not-allowed">

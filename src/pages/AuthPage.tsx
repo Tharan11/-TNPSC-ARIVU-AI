@@ -14,7 +14,7 @@ type AuthTab = 'login' | 'register';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email'),
-  password: z.string().min(6, 'Min 6 characters'),
+  password: z.string().min(8, 'Min 6 characters'),
 });
 
 const registerSchema = z.object({
@@ -37,6 +37,8 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<AuthTab>('login');
   const [showPassword, setShowPassword] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string>('');
   const { setUser, setIsAuthenticated, setLanguage } = useAppStore();
@@ -208,7 +210,14 @@ export default function AuthPage() {
               </div>
 
               <div className="text-right text-sm">
-                <button type="button" onClick={() => navigate('/auth/reset')} className="text-brand-primary hover:text-brand-secondary font-medium">
+                <button type="button" onClick={() => (async () => {
+          const email = loginForm.getValues('email');
+          if (!email) { alert(t('மின்னஞ்சல் உள்ளிடவும்', 'Enter your email first')); return; }
+          setResetLoading(true);
+          await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/auth/reset' });
+          setResetLoading(false);
+          setResetSent(true);
+        })()} className="text-brand-primary hover:text-brand-secondary font-medium">
                   {t('கடவுச்சொல் மறந்துவிட்டதா?', 'Forgot password?')}
                 </button>
               </div>

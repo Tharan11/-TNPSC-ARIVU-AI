@@ -20,6 +20,19 @@ const stagger = {
 export default function ExamsPage() {
   const t = useT();
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const selectedExam = slug ? MOCK_EXAMS.find((e) => e.slug === slug) : null;
+
+  const DIFFICULTY_MAP: Record<string, { ta: string; en: string; color: string }> = {
+    GROUP_1: { ta: 'மிகவும் கடினம்', en: 'Very Hard', color: 'text-red-400' },
+    GROUP_2: { ta: 'கடினம்', en: 'Hard', color: 'text-orange-400' },
+    GROUP_2A: { ta: 'நடுத்தரம்', en: 'Medium', color: 'text-yellow-400' },
+    GROUP_4: { ta: 'எளிதானது', en: 'Easy', color: 'text-green-400' },
+    VAO: { ta: 'எளிதானது', en: 'Easy', color: 'text-green-400' },
+    ENGINEERING: { ta: 'கடினம்', en: 'Hard', color: 'text-orange-400' },
+    FOREST: { ta: 'நடுத்தரம்', en: 'Medium', color: 'text-yellow-400' },
+    POLICE: { ta: 'நடுத்தரம்', en: 'Medium', color: 'text-yellow-400' },
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0E1A]">

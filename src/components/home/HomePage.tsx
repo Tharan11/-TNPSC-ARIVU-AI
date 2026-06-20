@@ -52,11 +52,11 @@ function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const liveUsers = 12453 + Math.floor(Math.random() * 50);
-  const testsToday = 8234 + Math.floor(Math.random() * 30);
+  const liveUsers = useMemo(() => 12453 + Math.floor(Math.random() * 50), []);
+  const testsToday = useMemo(() => 8234 + Math.floor(Math.random() * 30), []);
 
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-700 dark:border-gray-800 py-16 lg:py-24">
+    <section className="relative overflow-hidden bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 py-16 lg:py-24">
       <div className="absolute inset-0 " />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid lg:grid-cols-12 gap-12 items-center">
@@ -222,7 +222,7 @@ function ExamCards() {
     <section className="bg-white dark:bg-gray-950 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             {t('தேர்வைத் தேர்வு செய்க', 'Choose Your Exam')}
           </h2>
           <p className="mt-2 text-gray-500 dark:text-gray-400 font-medium">
@@ -305,7 +305,7 @@ function DailyQuiz() {
       <section className="bg-gray-50 dark:bg-gray-900 py-16 border-t border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <Trophy className="w-16 h-16 text-red-600 mx-auto mb-4" />
-          <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white dark:text-white mb-2">{t('அன்றாட வினா முடிந்தது!', 'Daily Quiz Complete!')}</h3>
+          <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">{t('அன்றாட வினா முடிந்தது!', 'Daily Quiz Complete!')}</h3>
           <p className="text-lg text-gray-600 mb-6">{score}/{questions.length} {t('சரியான பதில்கள்', 'correct answers')}</p>
           <Link to="/tests" className="btn-primary inline-flex">
             {t('மேலும் தேர்வுகள்', 'More Tests')} <ArrowRight className="w-4 h-4" />
@@ -320,7 +320,7 @@ function DailyQuiz() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-8">
           <span className="badge-cyan mb-3">{t('அன்றாட வினா', 'Daily Quiz')}</span>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">{t('இன்றைய வினாக்கள்', "Today's Questions")}</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{t('இன்றைய வினாக்கள்', "Today's Questions")}</h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">{t('இலவசமாக முயற்சிக்கலாம்', 'Try for free — no signup needed')}</p>
         </div>
 
@@ -405,7 +405,7 @@ function CurrentAffairsPreview() {
         <div className="flex items-end justify-between gap-6 mb-10">
           <div>
             <span className="badge-cyan mb-2">{t('தகவல் களஞ்சியம்', 'Daily Updates')}</span>
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight mt-2">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight mt-2">
               {t('நடப்பு நிகழ்வுகள்', 'Current Affairs')}
             </h2>
           </div>
@@ -446,10 +446,10 @@ function CurrentAffairsPreview() {
 function LeaderboardPreview() {
   const t = useT();
   return (
-    <section className="bg-gray-50 dark:bg-gray-900 py-16 border-t border-gray-100 dark:border-gray-700 dark:border-gray-800">
+    <section className="bg-gray-50 dark:bg-gray-900 py-16 border-t border-gray-100 dark:border-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">{t('தரவரிசை', 'Leaderboard')}</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{t('தரவரிசை', 'Leaderboard')}</h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">{t('இந்த வாரத்தின் சிறந்த மாணவர்கள்', "This week's top performers")}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
@@ -500,7 +500,7 @@ function FeaturesComparison() {
     <section className="bg-white dark:bg-gray-950 py-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white dark:text-white tracking-tight">{t('ஏன் ARIVU AI?', 'Why ARIVU AI?')}</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{t('ஏன் ARIVU AI?', 'Why ARIVU AI?')}</h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">{t('ஒப்பீடு பாருங்கள்', 'See the comparison')}</p>
         </div>
         <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">

@@ -23,6 +23,12 @@ export interface User {
   currentStreak: number;
   longestStreak: number;
   totalStudyMins: number;
+  streak?: number;
+  dailyCompleted?: number;
+  streak?: number;
+  dailyCompleted?: number;
+  streak?: number;
+  dailyCompleted?: number;
 }
 
 export interface Exam {

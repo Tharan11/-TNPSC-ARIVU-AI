@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search, Star, ArrowRight, ChevronLeft, ChevronRight
@@ -6,6 +6,31 @@ import {
 import { useT, useAppStore } from '../store';
 import { MOCK_CURRENT_AFFAIRS } from '../lib/data';
 import type { CACategory } from '../lib/types';
+
+// Live news fetcher hook
+function useLiveNews() {
+  const [liveArticles, setLiveArticles] = useState<any[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const fetchNews = async () => {
+    try {
+      const res = await fetch('/api/news');
+      const data = await res.json();
+      if (data.articles?.length) {
+        setLiveArticles(data.articles);
+        setLastUpdated(new Date());
+      }
+    } catch(e) { console.error('Live news fetch failed', e); }
+  };
+
+  useEffect(() => {
+    fetchNews();
+    const interval = setInterval(fetchNews, 60000); // every 60 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  return { liveArticles, lastUpdated, fetchNews };
+}
 
 const CATEGORIES: CACategory[] = [
   'NATIONAL', 'INTERNATIONAL', 'TAMILNADU', 'ECONOMY', 'SCIENCE',
@@ -37,6 +62,7 @@ const CATEGORY_LABELS: Record<CACategory, { ta: string; en: string }> = {
 };
 
 export default function CurrentAffairsPage() {
+  const { liveArticles, lastUpdated, fetchNews } = useLiveNews();
   const t = useT();
   const { language } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,7 +72,8 @@ export default function CurrentAffairsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 5;
 
-  const filteredAffairs = MOCK_CURRENT_AFFAIRS.filter(ca => {
+  const allAffairs = [...liveArticles, ...MOCK_CURRENT_AFFAIRS];
+  const filteredAffairs = allAffairs.filter(ca => {
     const matchesCategory = !selectedCategory || ca.category === selectedCategory;
     const matchesSearch = searchQuery === '' ||
       ca.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,6 +115,17 @@ export default function CurrentAffairsPage() {
             </p>
           </motion.div>
 
+          {/* Live update indicator */}
+          {lastUpdated && (
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-green-400">
+                🟢 {lastUpdated.toLocaleTimeString('en-IN')} {' '}
+                {/* t('தானாக புதுப்பிக்கப்படுகிறது', 'Auto-updating every 60s') */}
+                Auto-updating every 60s
+              </span>
+              <button onClick={fetchNews} className="text-xs text-brand-secondary hover:underline">↻ Refresh</button>
+            </div>
+          )}
           {/* Search Bar */}
           <div className="relative mb-6">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />

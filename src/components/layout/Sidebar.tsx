@@ -39,16 +39,16 @@ export default function Sidebar() {
     { path: '/tests', icon: <Target className="w-5 h-5" />, label: t('தேர்வு எழுது', 'Mock Tests') },
     { path: '/current-affairs', icon: <Newspaper className="w-5 h-5" />, label: t('நடப்பு நிகழ்வுகள்', 'Current Affairs') },
     { path: '/exams', icon: <BookOpen className="w-5 h-5" />, label: t('பாடப் பொருட்கள்', 'Study Materials') },
-    { path: '/pyqs', icon: <FileText className="w-5 h-5" />, label: t('முந்தைய வினாத்தாள்கள்', 'PYQs') },
+    { path: '/pyq', icon: <FileText className="w-5 h-5" />, label: t('முந்தைய வினாத்தாள்கள்', 'PYQs') },
     { path: '/planner', icon: <CalendarCheck className="w-5 h-5" />, label: t('படிப்பு திட்டம்', 'Study Planner') },
-    { path: '/analytics', icon: <BarChart3 className="w-5 h-5" />, label: t('பகுப்பாய்வு', 'Analytics') },
+    { path: '/dashboard', icon: <BarChart3 className="w-5 h-5" />, label: t('பகுப்பாய்வு', 'Analytics') },
     { path: '/leaderboard', icon: <Trophy className="w-5 h-5" />, label: t('தரவரிசை', 'Leaderboard') },
-    { path: '/achievements', icon: <Award className="w-5 h-5" />, label: t('சாதனைகள்', 'Achievements') },
+    { path: '/leaderboard', icon: <Award className="w-5 h-5" />, label: t('சாதனைகள்', 'Achievements') },
   ];
 
   const bottomLinks: SidebarLink[] = [
     { path: '/profile', icon: <User className="w-5 h-5" />, label: t('சுயவிவரம்', 'Profile') },
-    { path: '/settings', icon: <Settings className="w-5 h-5" />, label: t('அமைப்புகள்', 'Settings') },
+    { path: '/profile', icon: <Settings className="w-5 h-5" />, label: t('அமைப்புகள்', 'Settings') },
   ];
 
   const isActive = (path: string) => location.pathname === path;

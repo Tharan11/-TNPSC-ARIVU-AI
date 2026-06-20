@@ -13,8 +13,8 @@ export default function ContactPage() {
         )}
       </p>
       <div className="flex flex-col gap-3 mt-6">
-        <a href="mailto:support@arivuai.com" className="flex items-center gap-2 text-brand-primary hover:underline">
-          <Mail className="w-4 h-4" /> support@arivuai.com
+        <a href="mailto:gangatharan110907@gmail.com" className="flex items-center gap-2 text-brand-primary hover:underline">
+          <Mail className="w-4 h-4" /> gangatharan110907@gmail.com
         </a>
         <a href="/community" className="flex items-center gap-2 text-brand-primary hover:underline">
           <MessageCircle className="w-4 h-4" /> {t('சமூக மன்றத்தில் கேளுங்கள்', 'Ask in our Community Forum')}

@@ -1,1 +1,11 @@
-{"rewrites":[{"source":"/((?!api/).*)", "destination":"/"}]}
+{
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/"
+    }
+  ],
+  "env": {
+    "NEWS_API_KEY": "690d13b4576e40979403d5febcd0f75a"
+  }
+}

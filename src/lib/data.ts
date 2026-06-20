@@ -229,8 +229,8 @@ export const MOCK_QUESTIONS: Question[] = [
     contentTamil: 'தமிழக சட்டமன்றத்தில் உள்ள மொத்த உறுப்பினர்களின் எண்ணிக்கை எவ்வளவு?',
     contentEnglish: 'What is the total number of members in the Tamil Nadu Legislative Assembly?',
     options: [
-      { id: 'a', textTamil: '224', textEnglish: '224', isCorrect: true },
-      { id: 'b', textTamil: '234', textEnglish: '234', isCorrect: false },
+      { id: 'a', textTamil: '224', textEnglish: '224', isCorrect: false },
+      { id: 'b', textTamil: '234', textEnglish: '234', isCorrect: true },
       { id: 'c', textTamil: '200', textEnglish: '200', isCorrect: false },
       { id: 'd', textTamil: '210', textEnglish: '210', isCorrect: false },
     ],

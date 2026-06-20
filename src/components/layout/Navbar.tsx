@@ -209,7 +209,7 @@ export default function Navbar() {
                             <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-800 hover:text-red-600">
                               <Settings className="w-4 h-4" /> {t('அமைப்புகள்', 'Settings')}
                             </Link>
-                            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-gray-800">
+                            <button onClick={async () => { const { supabase } = await import('../../lib/supabase'); await supabase.auth.signOut(); window.location.href = '/auth'; }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-gray-800">
                               <LogOut className="w-4 h-4" /> {t('வெளியேறு', 'Logout')}
                             </button>
                           </div>

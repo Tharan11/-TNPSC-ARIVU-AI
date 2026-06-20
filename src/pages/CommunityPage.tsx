@@ -54,7 +54,9 @@ export default function CommunityPage() {
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">{t('சமூகம்', 'Community')}</h1>
               <p className="text-gray-400 text-sm">{t('மாணவர்களுடன் இணைந்து, கேள்விகளைக் கேட்டு, வெற்றிகளைப் பகிர்ந்துகொள்ளுங்கள்', 'Connect, ask questions, share success')}</p>
             </div>
-            <button className="btn-primary flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => alert(t('கேள்வி கேட்கும் அம்சம் விரைவில் வருகிறது!', 'Post creation coming soon!'))}
+              className="btn-primary flex items-center gap-2 shrink-0">
               <Plus className="w-4 h-4" /> {t('கேள்வி', 'Ask')}
             </button>
           </motion.div>
@@ -84,7 +86,14 @@ export default function CommunityPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Posts */}
             <div className="lg:col-span-2 space-y-4">
-              {MOCK_POSTS.map((post, i) => (
+              {(activeTab === 'discussions'
+                ? MOCK_POSTS
+                : activeTab === 'doubts'
+                ? MOCK_POSTS.filter(p => p.tags.includes('DOUBT'))
+                : activeTab === 'resources'
+                ? MOCK_POSTS.filter(p => p.tags.includes('RESOURCES'))
+                : MOCK_POSTS.filter(p => p.tags.includes('SUCCESS'))
+              ).map((post, i) => (
                 <motion.div
                   key={post.id}
                   initial={{ opacity: 0, y: 20 }}

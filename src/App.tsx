@@ -17,7 +17,11 @@ import AITutorPage from './pages/AITutorPage';
 import ExamsPage from './pages/ExamsPage';
 import CurrentAffairsPage from './pages/CurrentAffairsPage';
 import CommunityPage from './pages/CommunityPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
+import NotificationsPage from './pages/NotificationsPage';
+import ProfilePage from './pages/ProfilePage';
+import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAppStore } from './store';
@@ -96,6 +100,7 @@ function App() {
             <Route path="/community/groups" element={<CommunityPage />} />
             <Route path="/community/mentors" element={<CommunityPage />} />
             <Route path="/success-stories" element={<CommunityPage />} />
+            <Route path="/community/success-stories" element={<SuccessStoriesPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
@@ -105,7 +110,12 @@ function App() {
             <Route path="/pyq" element={<ProtectedRoute><PYQPage /></ProtectedRoute>} />
             <Route path="/planner" element={<ProtectedRoute><PlannerPage /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/auth/reset" element={<ResetPasswordPage />} />
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+            <Route path="/notifications/:id" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/auth" element={<AuthPage />} />
+          <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
