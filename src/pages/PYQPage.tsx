@@ -161,6 +161,7 @@ export default function PYQPage() {
 
           {/* Exam Filter - only for Question Papers tab */}
           {activeTab === 'papers' && (
+            <>
             <div className="flex flex-wrap gap-2">
               {EXAMS.map(exam => (
                 <button key={exam} onClick={() => setSelectedExam(exam)}
@@ -174,6 +175,16 @@ export default function PYQPage() {
                 </button>
               ))}
             </div>
+            <div className="mt-3 flex items-start gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-2.5">
+              <span className="text-yellow-400 text-sm mt-0.5">ℹ️</span>
+              <p className="text-xs text-yellow-300/80">
+                {t(
+                  'வினாத்தாள்கள் நேரடியாக பதிவிறக்க TNPSC அதிகாரப்பூர்வ தளத்திற்கு செல்லவும். "TNPSC தளம்" பொத்தான் கிளிக் பண்ணுங்கள்.',
+                  'Question paper PDFs are available on the TNPSC official website. Click "TNPSC Site" to access them directly.'
+                )}
+              </p>
+            </div>
+            </>
           )}
         </div>
       </section>
@@ -211,13 +222,9 @@ export default function PYQPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <button onClick={() => setPreviewUrl(previewUrl === pyq.pdfUrl ? null : pyq.pdfUrl)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-gray-300 transition-colors">
-                            <Eye className="w-3.5 h-3.5" /> {t('பார்', 'Preview')}
-                          </button>
-                          <a href={pyq.pdfUrl} target="_blank" rel="noopener noreferrer"
+                          <a href="https://www.tnpsc.gov.in/English/previous-questions.html" target="_blank" rel="noopener noreferrer"
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary/10 hover:bg-brand-primary/20 rounded-lg text-xs text-brand-primary transition-colors">
-                            <ExternalLink className="w-3.5 h-3.5" /> {t('திற', 'Open')}
+                            <ExternalLink className="w-3.5 h-3.5" /> {t('TNPSC தளம்', 'TNPSC Site')}
                           </a>
                         </div>
                       </div>
@@ -231,7 +238,7 @@ export default function PYQPage() {
                       <p className="text-xs text-gray-400">{t('PDF முன்னோட்டம்', 'PDF Preview')}</p>
                       <button onClick={() => setPreviewUrl(null)} className="text-xs text-gray-500 hover:text-white">✕ {t('மூடு', 'Close')}</button>
                     </div>
-                    <iframe src={previewUrl} className="w-full h-96 rounded-lg border border-white/10 bg-white"
+                    <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`} className="w-full h-96 rounded-lg border border-white/10 bg-white"
                       title="PDF Preview" />
                     <p className="text-xs text-gray-500 mt-2 text-center">
                       {t('PDF திறக்கவில்லையா?', 'PDF not loading?')}{' '}
@@ -295,7 +302,7 @@ export default function PYQPage() {
                       <p className="text-xs text-gray-400">{t('PDF முன்னோட்டம்', 'PDF Preview')}</p>
                       <button onClick={() => setPreviewUrl(null)} className="text-xs text-gray-500 hover:text-white">✕ {t('மூடு', 'Close')}</button>
                     </div>
-                    <iframe src={previewUrl} className="w-full h-96 rounded-lg border border-white/10 bg-white"
+                    <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`} className="w-full h-96 rounded-lg border border-white/10 bg-white"
                       title="PDF Preview" />
                     <p className="text-xs text-gray-500 mt-2 text-center">
                       {t('PDF திறக்கவில்லையா?', 'PDF not loading?')}{' '}
