@@ -1,4 +1,16 @@
+import os
 
+BASE = "C:/TNPSC/src"
+
+# Create directories if they don't exist
+os.makedirs(os.path.join(BASE, "lib"), exist_ok=True)
+os.makedirs(os.path.join(BASE, "pages"), exist_ok=True)
+os.makedirs(os.path.join(BASE, "components"), exist_ok=True)
+
+# ─────────────────────────────────────────
+# FILE 1: src/lib/data.ts
+# ─────────────────────────────────────────
+DATA_TS = r"""
 export const MOCK_EXAMS: Exam[] = [
   { id: '1', slug: 'group-1', name: 'TNPSC Group 1', nameTamil: 'TNPSC குரூப் 1', group: 'GROUP_1', description: 'Deputy Collector, DSP, District Registrar and other senior posts', vacancyCount: 68, examDate: '2026-08-15' },
   { id: '2', slug: 'group-2', name: 'TNPSC Group 2', nameTamil: 'TNPSC குரூப் 2', group: 'GROUP_2', description: 'Sub-Registrar, Municipal Commissioner, Assistant Section Officer', vacancyCount: 120, examDate: '2026-07-20' },
@@ -317,3 +329,495 @@ export const EXTRA_QUESTIONS: Question[] = [
 ];
 
 export const ALL_QUESTIONS: Question[] = [...MOCK_QUESTIONS, ...EXTRA_QUESTIONS];
+"""
+
+# ─────────────────────────────────────────
+# FILE 2: src/pages/CurrentAffairsPage.tsx (Fixed - no broken hook)
+# ─────────────────────────────────────────
+CURRENT_AFFAIRS_TSX = r"""import { useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Search, Star, ArrowRight, ChevronLeft, ChevronRight, X
+} from 'lucide-react';
+import { useT, useAppStore } from '../store';
+import { MOCK_CURRENT_AFFAIRS } from '../lib/data';
+import type { CACategory } from '../lib/types';
+
+const CATEGORIES: CACategory[] = [
+  'NATIONAL', 'INTERNATIONAL', 'TAMILNADU', 'ECONOMY', 'SCIENCE',
+  'ENVIRONMENT', 'SPORTS', 'POLITICS', 'SCHEME'
+];
+
+const CATEGORY_COLORS: Record<CACategory, string> = {
+  NATIONAL: '#F59E0B', INTERNATIONAL: '#06B6D4', TAMILNADU: '#10B981',
+  ECONOMY: '#3B82F6', SCIENCE: '#8B5CF6', ENVIRONMENT: '#22C55E',
+  SPORTS: '#EF4444', POLITICS: '#EC4899', SCHEME: '#06B6D4',
+};
+
+const CATEGORY_LABELS: Record<CACategory, { ta: string; en: string }> = {
+  NATIONAL: { ta: 'தேசியம்', en: 'National' },
+  INTERNATIONAL: { ta: 'சர்வதேசம்', en: 'International' },
+  TAMILNADU: { ta: 'தமிழ்நாடு', en: 'Tamil Nadu' },
+  ECONOMY: { ta: 'பொருளாதாரம்', en: 'Economy' },
+  SCIENCE: { ta: 'அறிவியல்', en: 'Science' },
+  ENVIRONMENT: { ta: 'சுற்றுச்சூழல்', en: 'Environment' },
+  SPORTS: { ta: 'விளையாட்டு', en: 'Sports' },
+  POLITICS: { ta: 'அரசியல்', en: 'Politics' },
+  SCHEME: { ta: 'திட்டங்கள்', en: 'Scheme' },
+};
+
+export default function CurrentAffairsPage() {
+  const t = useT();
+  const { language } = useAppStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<CACategory | null>(null);
+  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'all'>('all');
+  const [selectedAffair, setSelectedAffair] = useState<typeof MOCK_CURRENT_AFFAIRS[number] | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 8;
+
+  const filteredAffairs = MOCK_CURRENT_AFFAIRS.filter(ca => {
+    const matchesCategory = !selectedCategory || ca.category === selectedCategory;
+    const matchesSearch = searchQuery === '' ||
+      ca.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ca.titleTamil.toLowerCase().includes(searchQuery.toLowerCase());
+    const affairDate = new Date(ca.date);
+    const now = new Date();
+    const daysDiff = (now.getTime() - affairDate.getTime()) / (1000 * 60 * 60 * 24);
+    const matchesDate =
+      dateFilter === 'all' ? true :
+      dateFilter === 'today' ? daysDiff < 1 :
+      dateFilter === 'week' ? daysDiff < 7 :
+      daysDiff < 31;
+    return matchesCategory && matchesSearch && matchesDate;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredAffairs.length / PAGE_SIZE));
+  const paginatedAffairs = filteredAffairs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  return (
+    <div className="min-h-screen bg-[#0A0E1A]">
+      {/* Hero */}
+      <section className="relative py-12 border-b border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-secondary/5 via-transparent to-transparent" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-8">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">
+              {t('நடப்பு நிகழ்வுகள்', 'Current Affairs')}
+            </h1>
+            <p className="text-gray-400">
+              {t('TNPSC தேர்வுக்கு முக்கியமான தினசரி செய்திகள்', 'Daily news and topics important for TNPSC exams')}
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                {filteredAffairs.length} {t('நிகழ்வுகள்', 'articles')}
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Search */}
+          <div className="relative mb-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <input
+              type="text"
+              placeholder={t('தேடு...', 'Search current affairs...')}
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+              className="w-full bg-[#111827] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-secondary/50 transition-colors"
+            />
+          </div>
+
+          {/* Date Filter */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(['today', 'week', 'month', 'all'] as const).map((filter) => (
+              <button key={filter} onClick={() => { setDateFilter(filter); setCurrentPage(1); }}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${dateFilter === filter ? 'btn-primary' : 'bg-[#111827] text-gray-400 hover:text-white border border-white/10'}`}>
+                {filter === 'today' && t('இன்று', 'Today')}
+                {filter === 'week' && t('இந்த வாரம்', 'This Week')}
+                {filter === 'month' && t('இந்த மாதம்', 'This Month')}
+                {filter === 'all' && t('அனைத்து', 'All')}
+              </button>
+            ))}
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2 pb-4">
+            <button onClick={() => { setSelectedCategory(null); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === null ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40' : 'bg-[#111827] text-gray-400 border border-white/10 hover:border-white/20'}`}>
+              {t('அனைத்தும்', 'All')}
+            </button>
+            {CATEGORIES.map((cat) => (
+              <button key={cat} onClick={() => { setSelectedCategory(selectedCategory === cat ? null : cat); setCurrentPage(1); }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all`}
+                style={{
+                  backgroundColor: selectedCategory === cat ? `${CATEGORY_COLORS[cat]}20` : '#111827',
+                  borderColor: selectedCategory === cat ? CATEGORY_COLORS[cat] : 'rgba(255,255,255,0.1)',
+                  color: selectedCategory === cat ? CATEGORY_COLORS[cat] : '#9CA3AF',
+                  border: '1px solid',
+                }}>
+                {t(CATEGORY_LABELS[cat].ta, CATEGORY_LABELS[cat].en)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <section className="py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="space-y-4">
+            {paginatedAffairs.length > 0 ? paginatedAffairs.map((affair, i) => (
+              <motion.div key={affair.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                className="card group cursor-pointer hover:border-brand-secondary/40"
+                onClick={() => setSelectedAffair(affair)}>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
+                    style={{ backgroundColor: `${CATEGORY_COLORS[affair.category]}20`, border: `1px solid ${CATEGORY_COLORS[affair.category]}40` }}>
+                    <span className="text-xs font-bold" style={{ color: CATEGORY_COLORS[affair.category] }}>
+                      {affair.category[0]}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="badge-gold text-xs px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: `${CATEGORY_COLORS[affair.category]}20`, color: CATEGORY_COLORS[affair.category], border: `1px solid ${CATEGORY_COLORS[affair.category]}40` }}>
+                        {t(CATEGORY_LABELS[affair.category].ta, CATEGORY_LABELS[affair.category].en)}
+                      </span>
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <Star key={j} className={`w-3 h-3 ${j < affair.importanceLevel ? 'text-brand-primary fill-brand-primary' : 'text-gray-700'}`} />
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-500 ml-auto">{new Date(affair.date).toLocaleDateString('en-GB')}</span>
+                    </div>
+                    <h3 className="text-base font-semibold text-white mb-2 group-hover:text-brand-secondary transition-colors tamil">
+                      {language === 'TAMIL' ? affair.titleTamil : affair.title}
+                    </h3>
+                    <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                      {language === 'TAMIL' ? affair.summaryTamil : affair.summary}
+                    </p>
+                    <div className="flex items-center gap-1 mt-3 text-sm text-brand-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+                      {t('விரிவாக படி', 'Read more')} <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )) : (
+              <div className="text-center py-12">
+                <p className="text-gray-400">{t('தேடல் பலனில்லை', 'No results found')}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40">
+                <ChevronLeft className="w-5 h-5 text-gray-400" />
+              </button>
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((i) => (
+                  <button key={i} onClick={() => setCurrentPage(i)}
+                    className={`w-10 h-10 rounded-lg font-medium transition-all ${i === currentPage ? 'btn-primary' : 'bg-[#111827] text-gray-400 border border-white/10 hover:border-white/20'}`}>
+                    {i}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40">
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+          )}
+
+          {/* Detail Modal */}
+          {selectedAffair && (
+            <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelectedAffair(null)}>
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-[#111827] border border-white/10 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+                <div className="flex items-start justify-between mb-4">
+                  <span className="badge-gold text-xs px-3 py-1 rounded-full"
+                    style={{ backgroundColor: `${CATEGORY_COLORS[selectedAffair.category]}20`, color: CATEGORY_COLORS[selectedAffair.category], border: `1px solid ${CATEGORY_COLORS[selectedAffair.category]}40` }}>
+                    {t(CATEGORY_LABELS[selectedAffair.category].ta, CATEGORY_LABELS[selectedAffair.category].en)}
+                  </span>
+                  <button onClick={() => setSelectedAffair(null)} className="text-gray-500 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2 tamil">
+                  {language === 'TAMIL' ? selectedAffair.titleTamil : selectedAffair.title}
+                </h2>
+                <div className="flex items-center gap-3 mb-4">
+                  <p className="text-xs text-gray-500">{new Date(selectedAffair.date).toLocaleDateString('en-GB')}</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400 mr-1">{t('TNPSC முக்கியத்துவம்', 'TNPSC Importance')}:</span>
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <Star key={j} className={`w-3.5 h-3.5 ${j < selectedAffair.importanceLevel ? 'text-brand-primary fill-brand-primary' : 'text-gray-700'}`} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed text-base">
+                  {language === 'TAMIL' ? selectedAffair.summaryTamil : selectedAffair.summary}
+                </p>
+                <button onClick={() => setSelectedAffair(null)} className="btn-secondary mt-6 w-full">
+                  {t('மூடு', 'Close')}
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+"""
+
+# ─────────────────────────────────────────
+# FILE 3: src/pages/DashboardPage.tsx
+# ─────────────────────────────────────────
+DASHBOARD_TSX = r"""import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Flame, Trophy, Star, Zap, BookOpen, Target, TrendingUp, Calendar, ArrowRight, Brain, CheckCircle, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useT, useAppStore } from '../store';
+import { supabase } from '../lib/supabase';
+import { MOCK_EXAMS } from '../lib/data';
+
+interface UserStats {
+  streak: number;
+  rank: number;
+  accuracy: number;
+  xp: number;
+  lessonsToday: number;
+  totalLessons: number;
+  displayName: string;
+}
+
+const RECENT_ACTIVITY = [
+  { label: 'Daily Quiz — June 19', score: '8/10', time: '2h ago', icon: Target, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+  { label: 'Current Affairs Read', score: '5 articles', time: 'Yesterday', icon: BookOpen, color: 'text-green-400', bg: 'bg-green-400/10' },
+  { label: 'Group 4 Mock Test', score: '72/100', time: '2 days ago', icon: Trophy, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+];
+
+export default function DashboardPage() {
+  const t = useT();
+  const { user } = useAppStore();
+  const [stats, setStats] = useState<UserStats>({
+    streak: 0, rank: 0, accuracy: 0, xp: 0,
+    lessonsToday: 0, totalLessons: 5, displayName: ''
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user?.id) { setLoading(false); return; }
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, xp, streak, rank, accuracy, lessons_today, total_lessons')
+          .eq('id', user.id)
+          .single();
+        if (profile) {
+          setStats({
+            streak: profile.streak ?? 0, rank: profile.rank ?? 0,
+            accuracy: profile.accuracy ?? 0, xp: profile.xp ?? 0,
+            lessonsToday: profile.lessons_today ?? 0, totalLessons: profile.total_lessons ?? 5,
+            displayName: profile.display_name ?? user.email?.split('@')[0] ?? 'மாணவர்',
+          });
+        }
+      } catch (e) { console.error('Stats fetch failed', e); }
+      finally { setLoading(false); }
+    };
+    fetchStats();
+  }, [user]);
+
+  const statCards = [
+    { icon: Flame, value: stats.streak, label: t('நாள் தொடர்ச்சி', 'Day Streak'), color: 'text-orange-400', bg: 'bg-orange-400/10' },
+    { icon: Trophy, value: stats.rank ? `#${stats.rank}` : '—', label: t('தரவரிசை', 'Rank'), color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+    { icon: Star, value: stats.accuracy ? `${stats.accuracy}%` : '—', label: t('துல்லியம்', 'Accuracy'), color: 'text-green-400', bg: 'bg-green-400/10' },
+    { icon: Zap, value: stats.xp.toLocaleString(), label: 'XP', color: 'text-purple-400', bg: 'bg-purple-400/10' },
+  ];
+
+  // Upcoming exams from MOCK_EXAMS
+  const today = new Date();
+  const upcomingExams = MOCK_EXAMS
+    .filter(e => new Date(e.examDate) > today)
+    .sort((a, b) => new Date(a.examDate).getTime() - new Date(b.examDate).getTime())
+    .slice(0, 3);
+
+  return (
+    <div className="min-h-screen bg-[#0A0E1A] px-4 py-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+
+        {/* Welcome */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+            {t('வணக்கம்', 'Welcome')}{stats.displayName ? `, ${stats.displayName}` : ''}!
+          </h1>
+          <p className="text-gray-400 mt-1 text-sm">
+            {t('TNPSC தேர்வு வெற்றி பெற — ஆரம்பிக்கலாம்', 'Ready to ace TNPSC — lets go')}
+          </p>
+        </motion.div>
+
+        {/* Stat Cards */}
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[0,1,2,3].map(i => <div key={i} className="h-24 min-h-[96px] rounded-xl bg-white/5 animate-pulse" />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {statCards.map(({ icon: Icon, value, label, color, bg }) => (
+              <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-[#111827] border border-white/10 rounded-xl p-4 flex flex-col gap-2 min-h-[96px]">
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${bg}`}>
+                  <Icon className={`w-5 h-5 ${color}`} />
+                </div>
+                <p className={`text-2xl font-bold ${color}`}>{value || '0'}</p>
+                <p className="text-xs text-gray-400">{label}</p>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Today Progress */}
+        <div className="bg-[#111827] border border-white/10 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-white">{t('இன்றைய இலக்கு', "Today's Goal")}</p>
+            <p className="text-xs text-gray-400">{stats.lessonsToday}/{stats.totalLessons} {t('பாடங்கள்', 'lessons')}</p>
+          </div>
+          <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+            <motion.div initial={{ width: 0 }}
+              animate={{ width: `${stats.totalLessons ? (stats.lessonsToday / stats.totalLessons) * 100 : 0}%` }}
+              transition={{ duration: 1 }} className="h-full bg-brand-primary rounded-full" />
+          </div>
+          {stats.streak > 0 && (
+            <p className="text-xs text-orange-400 mt-2">🔥 {stats.streak} {t('நாள் தொடர்ச்சி!', 'day streak!')}</p>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { to: '/ai-tutor', icon: Brain, label: t('AI ஆசிரியரிடம் கேள்', 'Ask AI Tutor'), color: 'text-brand-primary' },
+            { to: '/tests', icon: Target, label: t('மாக் தேர்வு தொடங்கு', 'Start Mock Test'), color: 'text-cyan-400' },
+            { to: '/current-affairs', icon: TrendingUp, label: t('நடப்பு நிகழ்வுகள்', 'Current Affairs'), color: 'text-green-400' },
+          ].map(({ to, icon: Icon, label, color }) => (
+            <Link key={to} to={to}
+              className="bg-[#111827] border border-white/10 hover:border-brand-primary/40 rounded-xl p-4 flex items-center gap-3 transition-colors group">
+              <Icon className={`w-5 h-5 ${color}`} />
+              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{label}</span>
+              <ArrowRight className="w-4 h-4 text-gray-600 ml-auto group-hover:text-brand-primary transition-colors" />
+            </Link>
+          ))}
+        </div>
+
+        {/* Today's Quiz CTA */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-2xl border border-brand-primary/30 bg-gradient-to-br from-brand-primary/10 via-brand-secondary/5 to-transparent p-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/5 to-brand-secondary/5 pointer-events-none" />
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">📝</span>
+                <h3 className="text-lg font-bold text-white">
+                  {t('இன்றைய வினாடி வினா', "Today's Quiz")}
+                </h3>
+              </div>
+              <p className="text-sm text-gray-400">
+                {t('10 கேள்விகள் · 10 நிமிடம் · நடப்பு நிகழ்வுகள் + GK', '10 questions · 10 minutes · Current Affairs + GK')}
+              </p>
+            </div>
+            <Link to="/tests"
+              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white font-semibold rounded-xl hover:bg-brand-primary/90 transition-all hover:shadow-lg hover:shadow-brand-primary/20">
+              {t('தொடங்கு', 'Start Now')} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Recent Activity */}
+        <div className="bg-[#111827] border border-white/10 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-400" />
+              {t('சமீபத்திய செயல்பாடு', 'Recent Activity')}
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {RECENT_ACTIVITY.map(({ label, score, time, icon: Icon, color, bg }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${bg}`}>
+                  <Icon className={`w-4 h-4 ${color}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate">{label}</p>
+                </div>
+                <span className="text-xs font-medium text-brand-secondary bg-brand-secondary/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                  {score}
+                </span>
+                <span className="text-xs text-gray-500 flex-shrink-0">{time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Exams */}
+        {upcomingExams.length > 0 && (
+          <div className="bg-[#111827] border border-white/10 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-4 h-4 text-brand-primary" />
+              <h3 className="text-sm font-semibold text-white">{t('வரவிருக்கும் தேர்வுகள்', 'Upcoming Exams')}</h3>
+            </div>
+            <div className="space-y-3">
+              {upcomingExams.map((exam) => (
+                <Link key={exam.id} to={`/exams/${exam.slug}`}
+                  className="flex items-center gap-3 group hover:bg-white/5 rounded-lg p-2 -mx-2 transition-colors">
+                  <CheckCircle className="w-4 h-4 text-brand-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white group-hover:text-brand-secondary transition-colors truncate">{exam.name}</p>
+                  </div>
+                  <span className="text-xs text-gray-400 flex-shrink-0">
+                    {new Date(exam.examDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                  </span>
+                  {exam.vacancyCount && (
+                    <span className="text-xs font-medium text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                      {exam.vacancyCount.toLocaleString()} {t('காலிப்பணியிடங்கள்', 'vacancies')}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+"""
+
+# Write all files directly into the project
+files = {
+    f"{BASE}/lib/data.ts": DATA_TS,
+    f"{BASE}/pages/CurrentAffairsPage.tsx": CURRENT_AFFAIRS_TSX,
+    f"{BASE}/pages/DashboardPage.tsx": DASHBOARD_TSX,
+}
+
+success = []
+failed = []
+
+for path, content in files.items():
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        success.append(path)
+        print(f"Written: {path} ({len(content)} chars)")
+    except Exception as e:
+        failed.append((path, str(e)))
+        print(f"Failed: {path} - {e}")
+
+print(f"\n{len(success)} files written, {len(failed)} failed")
