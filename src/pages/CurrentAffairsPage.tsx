@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Search, Star, ArrowRight, ChevronLeft, ChevronRight, X
+  Search, Star, ArrowRight, ChevronLeft, ChevronRight, X, Radio
 } from 'lucide-react';
 import { useT, useAppStore } from '../store';
 import { MOCK_CURRENT_AFFAIRS } from '../lib/data';
@@ -39,6 +39,42 @@ export default function CurrentAffairsPage() {
   const [selectedAffair, setSelectedAffair] = useState<typeof MOCK_CURRENT_AFFAIRS[number] | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 8;
+
+  // Live headlines via the server-side NewsAPI proxy (api/news.js).
+  // Polls every 60s; the proxy itself caches at the edge so this doesn't
+  // burn through NewsAPI's free-tier daily quota.
+  const [liveHeadlines, setLiveHeadlines] = useState<
+    { id: string; title: string; source: string; url: string; publishedAt: string }[]
+  >([]);
+  const [liveUpdatedAt, setLiveUpdatedAt] = useState<number | null>(null);
+  const [liveError, setLiveError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchLiveNews = async () => {
+      try {
+        const res = await fetch('/api/news');
+        if (!res.ok) throw new Error('news fetch failed');
+        const data = await res.json();
+        if (!cancelled) {
+          setLiveHeadlines(data.headlines || []);
+          setLiveUpdatedAt(Date.now());
+          setLiveError(false);
+        }
+      } catch {
+        if (!cancelled) setLiveError(true);
+      }
+    };
+
+    fetchLiveNews();
+    const interval = setInterval(fetchLiveNews, 60000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   const filteredAffairs = MOCK_CURRENT_AFFAIRS.filter(ca => {
     const matchesCategory = !selectedCategory || ca.category === selectedCategory;
@@ -79,6 +115,36 @@ export default function CurrentAffairsPage() {
               </span>
             </div>
           </motion.div>
+
+          {/* Live News Ticker - auto-refreshes every 60s */}
+          <div className="mb-6 rounded-xl border border-white/10 bg-[#111827] overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-white/5">
+              <Radio className="w-4 h-4 text-red-400 animate-pulse" />
+              <span className="text-xs font-semibold text-red-400 uppercase tracking-wide">
+                {t('நேரலை செய்திகள்', 'Live Headlines')}
+              </span>
+              {liveUpdatedAt && (
+                <span className="text-[11px] text-gray-500 ml-auto">
+                  {t('புதுப்பிக்கப்பட்டது', 'Updated')} {Math.max(0, Math.round((Date.now() - liveUpdatedAt) / 1000))}s {t('முன்பு', 'ago')}
+                </span>
+              )}
+            </div>
+            <div className="divide-y divide-white/5 max-h-48 overflow-y-auto">
+              {liveHeadlines.length > 0 ? liveHeadlines.map((h) => (
+                <a key={h.id} href={h.url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-brand-secondary hover:bg-white/5 transition-colors">
+                  <span className="truncate flex-1">{h.title}</span>
+                  <span className="text-[11px] text-gray-500 flex-shrink-0">{h.source}</span>
+                </a>
+              )) : (
+                <p className="px-4 py-3 text-xs text-gray-500">
+                  {liveError
+                    ? t('நேரலை செய்திகள் தற்போது கிடைக்கவில்லை', 'Live news unavailable right now')
+                    : t('ஏற்றுகிறது...', 'Loading...')}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Search */}
           <div className="relative mb-6">
