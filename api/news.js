@@ -1,28 +1,39 @@
 export default async function handler(req, res) {
-  const newsApiKey = process.env.NEWS_API_KEY;
   const gNewsKey = process.env.GNEWS_API_KEY;
-
+  const newsApiKey = process.env.NEWS_API_KEY;
   let headlines = [];
 
-  // Try GNews first (works server-side, free tier)
   if (gNewsKey) {
     try {
-      const url = `https://gnews.io/api/v4/top-headlines?country=in&max=10&lang=en&apikey=${gNewsKey}`;
-      const r = await fetch(url);
-      const data = await r.json();
-      if (r.ok && data.articles?.length) {
-        headlines = data.articles.map((a, i) => ({
-          id: `gnews-${i}-${Date.parse(a.publishedAt) || Date.now()}`,
-          title: a.title,
-          source: a.source?.name || 'Unknown',
-          url: a.url,
-          publishedAt: a.publishedAt,
-        }));
+      const queries = [
+        'India government scheme policy',
+        'Tamil Nadu government',
+        'India economy budget RBI',
+        'India science technology space ISRO',
+        'India sports award',
+      ];
+      const results = await Promise.all(queries.map(q =>
+        fetch(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&country=in&max=4&lang=en&apikey=${gNewsKey}`)
+          .then(r => r.json()).catch(() => ({ articles: [] }))
+      ));
+      const seen = new Set();
+      for (const data of results) {
+        for (const a of (data.articles || [])) {
+          if (!seen.has(a.url) && a.title) {
+            seen.add(a.url);
+            headlines.push({
+              id: `gnews-${Date.parse(a.publishedAt) || Date.now()}-${seen.size}`,
+              title: a.title,
+              source: a.source?.name || 'Unknown',
+              url: a.url,
+              publishedAt: a.publishedAt,
+            });
+          }
+        }
       }
     } catch (_) {}
   }
 
-  // Fallback to NewsAPI (works only from localhost, but try anyway)
   if (!headlines.length && newsApiKey) {
     try {
       const url = `https://newsapi.org/v2/top-headlines?country=in&pageSize=10&apiKey=${newsApiKey}`;

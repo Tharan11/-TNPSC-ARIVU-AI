@@ -1,26 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Search, Star, ArrowRight, ChevronLeft, ChevronRight, X, Radio
-} from 'lucide-react';
+import { Search, Radio, ExternalLink, RefreshCw } from 'lucide-react';
 import { useT, useAppStore } from '../store';
-import { MOCK_CURRENT_AFFAIRS } from '../lib/data';
-import type { CACategory } from '../lib/types';
 
-const CATEGORIES: CACategory[] = [
-  'NATIONAL', 'INTERNATIONAL', 'TAMILNADU', 'ECONOMY', 'SCIENCE',
-  'ENVIRONMENT', 'SPORTS', 'POLITICS', 'SCHEME'
-];
+type Category = 'ALL' | 'NATIONAL' | 'TAMILNADU' | 'ECONOMY' | 'SCIENCE' | 'ENVIRONMENT' | 'SPORTS' | 'POLITICS' | 'SCHEME';
 
-const CATEGORY_COLORS: Record<CACategory, string> = {
-  NATIONAL: '#F59E0B', INTERNATIONAL: '#06B6D4', TAMILNADU: '#10B981',
+const CATEGORY_COLORS: Record<Category, string> = {
+  ALL: '#9CA3AF', NATIONAL: '#F59E0B', TAMILNADU: '#10B981',
   ECONOMY: '#3B82F6', SCIENCE: '#8B5CF6', ENVIRONMENT: '#22C55E',
   SPORTS: '#EF4444', POLITICS: '#EC4899', SCHEME: '#06B6D4',
 };
 
-const CATEGORY_LABELS: Record<CACategory, { ta: string; en: string }> = {
+const CATEGORY_LABELS: Record<Category, { ta: string; en: string }> = {
+  ALL: { ta: 'அனைத்தும்', en: 'All' },
   NATIONAL: { ta: 'தேசியம்', en: 'National' },
-  INTERNATIONAL: { ta: 'சர்வதேசம்', en: 'International' },
   TAMILNADU: { ta: 'தமிழ்நாடு', en: 'Tamil Nadu' },
   ECONOMY: { ta: 'பொருளாதாரம்', en: 'Economy' },
   SCIENCE: { ta: 'அறிவியல்', en: 'Science' },
@@ -30,74 +23,74 @@ const CATEGORY_LABELS: Record<CACategory, { ta: string; en: string }> = {
   SCHEME: { ta: 'திட்டங்கள்', en: 'Scheme' },
 };
 
+function autoCategory(title: string): Category {
+  const t = title.toLowerCase();
+  if (/tamil nadu|chennai|tamilnadu|dmk|aiadmk|mk stalin/.test(t)) return 'TAMILNADU';
+  if (/economy|gdp|rbi|budget|inflation|rupee|tax|finance|bank/.test(t)) return 'ECONOMY';
+  if (/isro|science|technology|space|satellite|research|ai|nuclear/.test(t)) return 'SCIENCE';
+  if (/environment|climate|pollution|forest|wildlife|green|solar/.test(t)) return 'ENVIRONMENT';
+  if (/sport|cricket|olympic|medal|ipl|football|hockey|athlete/.test(t)) return 'SPORTS';
+  if (/scheme|yojana|mission|programme|welfare|subsidy|pmay|pm kisan/.test(t)) return 'SCHEME';
+  if (/modi|parliament|election|minister|government|policy|lok sabha|rajya/.test(t)) return 'POLITICS';
+  return 'NATIONAL';
+}
+
+interface Headline {
+  id: string; title: string; source: string; url: string; publishedAt: string;
+}
+
 export default function CurrentAffairsPage() {
   const t = useT();
   const { language } = useAppStore();
+  const [headlines, setHeadlines] = useState<Headline[]>([]);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CACategory | null>(null);
-  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'all'>('all');
-  const [selectedAffair, setSelectedAffair] = useState<typeof MOCK_CURRENT_AFFAIRS[number] | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 8;
+  const [selectedCategory, setSelectedCategory] = useState<Category>('ALL');
+  const [secondsAgo, setSecondsAgo] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Live headlines via the server-side NewsAPI proxy (api/news.js).
-  // Polls every 60s; the proxy itself caches at the edge so this doesn't
-  // burn through NewsAPI's free-tier daily quota.
-  const [liveHeadlines, setLiveHeadlines] = useState<
-    { id: string; title: string; source: string; url: string; publishedAt: string }[]
-  >([]);
-  const [liveUpdatedAt, setLiveUpdatedAt] = useState<number | null>(null);
-  const [liveError, setLiveError] = useState(false);
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/news');
+      if (!res.ok) throw new Error('failed');
+      const data = await res.json();
+      setHeadlines(data.headlines || []);
+      setUpdatedAt(Date.now());
+      setSecondsAgo(0);
+      setError(false);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-
-    const fetchLiveNews = async () => {
-      try {
-        const res = await fetch('/api/news');
-        if (!res.ok) throw new Error('news fetch failed');
-        const data = await res.json();
-        if (!cancelled) {
-          setLiveHeadlines(data.headlines || []);
-          setLiveUpdatedAt(Date.now());
-          setLiveError(false);
-        }
-      } catch {
-        if (!cancelled) setLiveError(true);
-      }
-    };
-
-    fetchLiveNews();
-    const interval = setInterval(fetchLiveNews, 60000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
+    fetchNews();
+    const interval = setInterval(fetchNews, 60000);
+    return () => clearInterval(interval);
   }, []);
 
-  const filteredAffairs = MOCK_CURRENT_AFFAIRS.filter(ca => {
-    const matchesCategory = !selectedCategory || ca.category === selectedCategory;
-    const matchesSearch = searchQuery === '' ||
-      ca.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ca.titleTamil.toLowerCase().includes(searchQuery.toLowerCase());
-    const affairDate = new Date(ca.date);
-    const now = new Date();
-    const daysDiff = (now.getTime() - affairDate.getTime()) / (1000 * 60 * 60 * 24);
-    const matchesDate =
-      dateFilter === 'all' ? true :
-      dateFilter === 'today' ? daysDiff < 1 :
-      dateFilter === 'week' ? daysDiff < 7 :
-      daysDiff < 31;
-    return matchesCategory && matchesSearch && matchesDate;
-  });
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setSecondsAgo(s => s + 1);
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [updatedAt]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAffairs.length / PAGE_SIZE));
-  const paginatedAffairs = filteredAffairs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const CATEGORIES: Category[] = ['ALL','NATIONAL','TAMILNADU','ECONOMY','SCIENCE','ENVIRONMENT','SPORTS','POLITICS','SCHEME'];
+
+  const filtered = headlines.filter(h => {
+    const matchCat = selectedCategory === 'ALL' || autoCategory(h.title) === selectedCategory;
+    const matchSearch = searchQuery === '' || h.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   return (
     <div className="min-h-screen bg-[#0A0E1A]">
-      {/* Hero */}
       <section className="relative py-12 border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-b from-brand-secondary/5 via-transparent to-transparent" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
@@ -106,80 +99,48 @@ export default function CurrentAffairsPage() {
               {t('நடப்பு நிகழ்வுகள்', 'Current Affairs')}
             </h1>
             <p className="text-gray-400">
-              {t('TNPSC தேர்வுக்கு முக்கியமான தினசரி செய்திகள்', 'Daily news and topics important for TNPSC exams')}
+              {t('TNPSC தேர்வுக்கு முக்கியமான தினசரி செய்திகள்', 'Daily news important for TNPSC exams')}
             </p>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                {filteredAffairs.length} {t('நிகழ்வுகள்', 'articles')}
+                {filtered.length} {t('செய்திகள்', 'articles')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs text-red-400 bg-red-400/10 border border-red-400/20 px-3 py-1 rounded-full">
+                <Radio className="w-3 h-3 animate-pulse" />
+                {t('நேரலை', 'Live')} · 60s {t('புதுப்பிப்பு', 'refresh')}
               </span>
             </div>
           </motion.div>
 
-          {/* Live News Ticker - auto-refreshes every 60s */}
-          <div className="mb-6 rounded-xl border border-white/10 bg-[#111827] overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-white/5">
+          {/* Header bar */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
               <Radio className="w-4 h-4 text-red-400 animate-pulse" />
-              <span className="text-xs font-semibold text-red-400 uppercase tracking-wide">
-                {t('நேரலை செய்திகள்', 'Live Headlines')}
-              </span>
-              {liveUpdatedAt && (
-                <span className="text-[11px] text-gray-500 ml-auto">
-                  {t('புதுப்பிக்கப்பட்டது', 'Updated')} {Math.max(0, Math.round((Date.now() - liveUpdatedAt) / 1000))}s {t('முன்பு', 'ago')}
-                </span>
+              <span className="text-sm font-semibold text-red-400">{t('நேரலை செய்திகள்', 'Live Headlines')}</span>
+              {updatedAt && (
+                <span className="text-xs text-gray-500">{secondsAgo}s {t('முன்பு புதுப்பிக்கப்பட்டது', 'ago')}</span>
               )}
             </div>
-            <div className="divide-y divide-white/5 max-h-48 overflow-y-auto">
-              {liveHeadlines.length > 0 ? liveHeadlines.map((h) => (
-                <a key={h.id} href={h.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-brand-secondary hover:bg-white/5 transition-colors">
-                  <span className="truncate flex-1">{h.title}</span>
-                  <span className="text-[11px] text-gray-500 flex-shrink-0">{h.source}</span>
-                </a>
-              )) : (
-                <p className="px-4 py-3 text-xs text-gray-500">
-                  {liveError
-                    ? t('நேரலை செய்திகள் தற்போது கிடைக்கவில்லை', 'Live news unavailable right now')
-                    : t('ஏற்றுகிறது...', 'Loading...')}
-                </p>
-              )}
-            </div>
+            <button onClick={fetchNews} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20">
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+              {t('புதுப்பி', 'Refresh')}
+            </button>
           </div>
 
           {/* Search */}
-          <div className="relative mb-6">
+          <div className="relative mb-4">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-            <input
-              type="text"
-              placeholder={t('தேடு...', 'Search current affairs...')}
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-[#111827] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-secondary/50 transition-colors"
-            />
-          </div>
-
-          {/* Date Filter */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {(['today', 'week', 'month', 'all'] as const).map((filter) => (
-              <button key={filter} onClick={() => { setDateFilter(filter); setCurrentPage(1); }}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${dateFilter === filter ? 'btn-primary' : 'bg-[#111827] text-gray-400 hover:text-white border border-white/10'}`}>
-                {filter === 'today' && t('இன்று', 'Today')}
-                {filter === 'week' && t('இந்த வாரம்', 'This Week')}
-                {filter === 'month' && t('இந்த மாதம்', 'This Month')}
-                {filter === 'all' && t('அனைத்து', 'All')}
-              </button>
-            ))}
+            <input type="text" placeholder={t('செய்திகள் தேடு...', 'Search news...')}
+              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-[#111827] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-secondary/50 transition-colors" />
           </div>
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2 pb-4">
-            <button onClick={() => { setSelectedCategory(null); setCurrentPage(1); }}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === null ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/40' : 'bg-[#111827] text-gray-400 border border-white/10 hover:border-white/20'}`}>
-              {t('அனைத்தும்', 'All')}
-            </button>
-            {CATEGORIES.map((cat) => (
-              <button key={cat} onClick={() => { setSelectedCategory(selectedCategory === cat ? null : cat); setCurrentPage(1); }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all`}
+            {CATEGORIES.map(cat => (
+              <button key={cat} onClick={() => setSelectedCategory(cat)}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={{
                   backgroundColor: selectedCategory === cat ? `${CATEGORY_COLORS[cat]}20` : '#111827',
                   borderColor: selectedCategory === cat ? CATEGORY_COLORS[cat] : 'rgba(255,255,255,0.1)',
@@ -193,110 +154,60 @@ export default function CurrentAffairsPage() {
         </div>
       </section>
 
-      {/* Content */}
-      <section className="py-12">
+      {/* News Cards */}
+      <section className="py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="space-y-4">
-            {paginatedAffairs.length > 0 ? paginatedAffairs.map((affair, i) => (
-              <motion.div key={affair.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-                className="card group cursor-pointer hover:border-brand-secondary/40"
-                onClick={() => setSelectedAffair(affair)}>
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 mt-1"
-                    style={{ backgroundColor: `${CATEGORY_COLORS[affair.category]}20`, border: `1px solid ${CATEGORY_COLORS[affair.category]}40` }}>
-                    <span className="text-xs font-bold" style={{ color: CATEGORY_COLORS[affair.category] }}>
-                      {affair.category[0]}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className="badge-gold text-xs px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: `${CATEGORY_COLORS[affair.category]}20`, color: CATEGORY_COLORS[affair.category], border: `1px solid ${CATEGORY_COLORS[affair.category]}40` }}>
-                        {t(CATEGORY_LABELS[affair.category].ta, CATEGORY_LABELS[affair.category].en)}
-                      </span>
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: 5 }).map((_, j) => (
-                          <Star key={j} className={`w-3 h-3 ${j < affair.importanceLevel ? 'text-brand-primary fill-brand-primary' : 'text-gray-700'}`} />
-                        ))}
-                      </div>
-                      <span className="text-xs text-gray-500 ml-auto">{new Date(affair.date).toLocaleDateString('en-GB')}</span>
-                    </div>
-                    <h3 className="text-base font-semibold text-white mb-2 group-hover:text-brand-secondary transition-colors tamil">
-                      {language === 'TAMIL' ? affair.titleTamil : affair.title}
-                    </h3>
-                    <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
-                      {language === 'TAMIL' ? affair.summaryTamil : affair.summary}
-                    </p>
-                    <div className="flex items-center gap-1 mt-3 text-sm text-brand-secondary opacity-0 group-hover:opacity-100 transition-opacity">
-                      {t('விரிவாக படி', 'Read more')} <ArrowRight className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )) : (
-              <div className="text-center py-12">
-                <p className="text-gray-400">{t('தேடல் பலனில்லை', 'No results found')}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40">
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              </button>
-              <div className="flex gap-1">
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((i) => (
-                  <button key={i} onClick={() => setCurrentPage(i)}
-                    className={`w-10 h-10 rounded-lg font-medium transition-all ${i === currentPage ? 'btn-primary' : 'bg-[#111827] text-gray-400 border border-white/10 hover:border-white/20'}`}>
-                    {i}
-                  </button>
-                ))}
-              </div>
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40">
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
+          {loading && headlines.length === 0 ? (
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-20 rounded-xl bg-[#111827] animate-pulse border border-white/5" />
+              ))}
             </div>
-          )}
-
-          {/* Detail Modal */}
-          {selectedAffair && (
-            <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setSelectedAffair(null)}>
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-[#111827] border border-white/10 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
-                <div className="flex items-start justify-between mb-4">
-                  <span className="badge-gold text-xs px-3 py-1 rounded-full"
-                    style={{ backgroundColor: `${CATEGORY_COLORS[selectedAffair.category]}20`, color: CATEGORY_COLORS[selectedAffair.category], border: `1px solid ${CATEGORY_COLORS[selectedAffair.category]}40` }}>
-                    {t(CATEGORY_LABELS[selectedAffair.category].ta, CATEGORY_LABELS[selectedAffair.category].en)}
-                  </span>
-                  <button onClick={() => setSelectedAffair(null)} className="text-gray-500 hover:text-white transition-colors">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <h2 className="text-xl font-bold text-white mb-2 tamil">
-                  {language === 'TAMIL' ? selectedAffair.titleTamil : selectedAffair.title}
-                </h2>
-                <div className="flex items-center gap-3 mb-4">
-                  <p className="text-xs text-gray-500">{new Date(selectedAffair.date).toLocaleDateString('en-GB')}</p>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-400 mr-1">{t('TNPSC முக்கியத்துவம்', 'TNPSC Importance')}:</span>
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <Star key={j} className={`w-3.5 h-3.5 ${j < selectedAffair.importanceLevel ? 'text-brand-primary fill-brand-primary' : 'text-gray-700'}`} />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-gray-300 leading-relaxed text-base">
-                  {language === 'TAMIL' ? selectedAffair.summaryTamil : selectedAffair.summary}
-                </p>
-                <button onClick={() => setSelectedAffair(null)} className="btn-secondary mt-6 w-full">
-                  {t('மூடு', 'Close')}
-                </button>
-              </motion.div>
+          ) : error && headlines.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400 mb-4">{t('செய்திகள் கிடைக்கவில்லை', 'Could not load news')}</p>
+              <button onClick={fetchNews} className="btn-secondary">{t('மீண்டும் முயற்சி', 'Try again')}</button>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400">{t('தேடல் பலனில்லை', 'No results found')}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((h, i) => {
+                const cat = autoCategory(h.title);
+                const color = CATEGORY_COLORS[cat];
+                const timeAgo = h.publishedAt
+                  ? Math.round((Date.now() - Date.parse(h.publishedAt)) / 60000)
+                  : null;
+                return (
+                  <motion.a key={h.id} href={h.url} target="_blank" rel="noopener noreferrer"
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.03 }}
+                    className="flex items-start gap-4 p-4 rounded-xl bg-[#111827] border border-white/5 hover:border-white/20 hover:bg-[#151d2e] transition-all group">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                      style={{ backgroundColor: `${color}20`, border: `1px solid ${color}40` }}>
+                      <span className="text-xs font-bold" style={{ color }}>{cat[0]}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          style={{ backgroundColor: `${color}20`, color, border: `1px solid ${color}40` }}>
+                          {t(CATEGORY_LABELS[cat].ta, CATEGORY_LABELS[cat].en)}
+                        </span>
+                        <span className="text-xs text-gray-500">{h.source}</span>
+                        {timeAgo !== null && (
+                          <span className="text-xs text-gray-600 ml-auto">
+                            {timeAgo < 60 ? `${timeAgo}m ago` : `${Math.round(timeAgo/60)}h ago`}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-200 leading-snug group-hover:text-white transition-colors">{h.title}</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-gray-600 group-hover:text-brand-secondary flex-shrink-0 mt-1 transition-colors" />
+                  </motion.a>
+                );
+              })}
             </div>
           )}
         </div>
